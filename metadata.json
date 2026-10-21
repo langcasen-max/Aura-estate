@@ -1,0 +1,8 @@
+{
+  "name": "Aura Estates",
+  "description": "Modern Luxury Real Estate Platform — Editorial-quality property showcase, private viewings, and comprehensive client & agency management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
