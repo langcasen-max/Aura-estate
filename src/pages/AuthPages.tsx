@@ -18,7 +18,9 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
     setError(null);
     try {
       await signIn(email, password);
-      onNavigate('/dashboard');
+      const requestedPath = new URLSearchParams(window.location.search).get('next');
+      const safePath = requestedPath && requestedPath.startsWith('/') && !requestedPath.startsWith('//') ? requestedPath : '/dashboard';
+      onNavigate(safePath);
     } catch (err: any) {
       setError(err.message || 'Invalid credentials. Please verify your email and password.');
     }
