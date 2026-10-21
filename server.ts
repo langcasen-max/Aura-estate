@@ -6,20 +6,31 @@ import { createServer as createViteServer } from 'vite';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
 app.use(express.json({ limit: '20mb' }));
 
-// Initialize GoogleGenAI client
-const apiKey = process.env.GEMINI_API_KEY || '';
-const ai = new GoogleGenAI({
-  apiKey,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
-    },
-  },
+// Health check endpoint
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Initialize GoogleGenAI client lazily if key is available
+let _ai: GoogleGenAI | null = null;
+function getAiClient(): GoogleGenAI {
+  if (!_ai) {
+    const apiKey = process.env.GEMINI_API_KEY || '';
+    _ai = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        },
+      },
+    });
+  }
+  return _ai;
+}
 
 // Endpoint: Analyze product description & URL to generate ad angles & copy
 app.post('/api/analyze-product', async (req, res) => {
@@ -65,7 +76,7 @@ Provide your response in JSON format matching this schema:
 }
 `;
 
-    const response = await ai.models.generateContent({
+    const response = await getAiClient().models.generateContent({
       model: 'gemini-3.8-flash',
       contents: prompt,
       config: {
@@ -122,7 +133,7 @@ app.post('/api/generate-image', async (req, res) => {
 
     console.log(`Generating image with model: ${chosenModel}, size: ${imageSize}, ratio: ${aspectRatio}`);
 
-    const response = await ai.models.generateContent({
+    const response = await getAiClient().models.generateContent({
       model: chosenModel,
       contents: {
         parts: [{ text: enrichedPrompt }],
@@ -181,16 +192,46 @@ async function startServer() {
     });
   } else {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        hmr: process.env.DISABLE_HMR === 'true' ? false : undefined,
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`AdCraft Studio server running at http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Aura Estates server running at http://0.0.0.0:${PORT}`);
   });
+
+  server.on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`[Server] Port ${PORT} already bound or releasing. Keeping process alive.`);
+    } else {
+      console.error('[Server] Listen error:', err);
+    }
+  });
+
+  const handleShutdown = () => {
+    console.log('[Server] Gracefully shutting down...');
+    server.close(() => {
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(0), 2000).unref();
+  };
+
+  process.on('SIGTERM', handleShutdown);
+  process.on('SIGINT', handleShutdown);
 }
+
+process.on('uncaughtException', (err) => {
+  console.error('[Process] Uncaught Exception:', err);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Process] Unhandled Rejection:', reason);
+});
 
 startServer().catch((err) => {
   console.error('Failed to start server:', err);

@@ -192,7 +192,7 @@ function AppRouter() {
               </p>
               <button
                 type="button"
-                onClick={() => handleNavigate('/login')}
+                onClick={() => handleNavigate('/login?next=' + encodeURIComponent('/admin'))}
                 className="bg-stone-900 text-white font-bold text-xs px-6 py-3 rounded-full hover:bg-stone-800 transition-colors"
               >
                 Sign In as Administrator

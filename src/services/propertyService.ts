@@ -26,118 +26,125 @@ function saveLocalProperties(props: Property[]): void {
   }
 }
 
-export async function getProperties(filters: PropertyFilters = {}): Promise<{ properties: Property[]; total: number }> {
-  if (!isSupabaseConfigured || !supabase) {
-    // Local / Demo Mode filtering
-    let list = [...getLocalProperties()];
-
-    if (filters.listing_status && filters.listing_status !== 'all') {
-      list = list.filter(p => p.listing_status === filters.listing_status);
-    }
-    if (filters.property_type && filters.property_type !== 'all') {
-      list = list.filter(p => p.property_type === filters.property_type);
-    }
-    if (filters.city && filters.city !== 'all') {
-      list = list.filter(p => p.location.city.toLowerCase() === filters.city?.toLowerCase());
-    }
-    if (filters.min_price) {
-      list = list.filter(p => p.price >= filters.min_price!);
-    }
-    if (filters.max_price) {
-      list = list.filter(p => p.price <= filters.max_price!);
-    }
-    if (filters.bedrooms && filters.bedrooms !== 'all') {
-      list = list.filter(p => p.bedrooms >= Number(filters.bedrooms));
-    }
-    if (filters.bathrooms && filters.bathrooms !== 'all') {
-      list = list.filter(p => p.bathrooms >= Number(filters.bathrooms));
-    }
-    if (filters.min_area) {
-      list = list.filter(p => p.area_sqft >= filters.min_area!);
-    }
-    if (filters.amenities && filters.amenities.length > 0) {
-      list = list.filter(p => filters.amenities!.every((a: string) => p.amenities.includes(a)));
-    }
-    if (filters.search) {
-      const q = filters.search.toLowerCase().trim();
-      list = list.filter(
-        p =>
-          p.title.toLowerCase().includes(q) ||
-          p.description.toLowerCase().includes(q) ||
-          p.location.city.toLowerCase().includes(q) ||
-          p.location.address.toLowerCase().includes(q)
-      );
-    }
-
-    // Sorting
-    switch (filters.sort_by) {
-      case 'price_asc':
-        list.sort((a, b) => a.price - b.price);
-        break;
-      case 'price_desc':
-        list.sort((a, b) => b.price - a.price);
-        break;
-      case 'area_desc':
-        list.sort((a, b) => b.area_sqft - a.area_sqft);
-        break;
-      case 'beds_desc':
-        list.sort((a, b) => b.bedrooms - a.bedrooms);
-        break;
-      case 'oldest':
-        list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        break;
-      case 'newest':
-      default:
-        list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-    }
-
-    return { properties: list, total: list.length };
-  }
-
-  // Supabase implementation
-  let query = supabase.from('properties').select('*, media:property_media(*)', { count: 'exact' });
+function filterAndSortProperties(rawList: Property[], filters: PropertyFilters = {}): { properties: Property[]; total: number } {
+  let list = [...rawList];
 
   if (filters.listing_status && filters.listing_status !== 'all') {
-    query = query.eq('listing_status', filters.listing_status);
+    list = list.filter(p => p.listing_status === filters.listing_status);
   }
   if (filters.property_type && filters.property_type !== 'all') {
-    query = query.eq('property_type', filters.property_type);
+    list = list.filter(p => p.property_type === filters.property_type);
   }
   if (filters.city && filters.city !== 'all') {
-    query = query.eq('city', filters.city);
+    list = list.filter(p => p.location.city.toLowerCase() === filters.city?.toLowerCase());
   }
   if (filters.min_price) {
-    query = query.gte('price', filters.min_price);
+    list = list.filter(p => p.price >= filters.min_price!);
   }
   if (filters.max_price) {
-    query = query.lte('price', filters.max_price);
+    list = list.filter(p => p.price <= filters.max_price!);
   }
   if (filters.bedrooms && filters.bedrooms !== 'all') {
-    query = query.gte('bedrooms', filters.bedrooms);
+    list = list.filter(p => p.bedrooms >= Number(filters.bedrooms));
   }
   if (filters.bathrooms && filters.bathrooms !== 'all') {
-    query = query.gte('bathrooms', filters.bathrooms);
+    list = list.filter(p => p.bathrooms >= Number(filters.bathrooms));
   }
   if (filters.min_area) {
-    query = query.gte('area_sqft', filters.min_area);
+    list = list.filter(p => p.area_sqft >= filters.min_area!);
+  }
+  if (filters.amenities && filters.amenities.length > 0) {
+    list = list.filter(p => filters.amenities!.every((a: string) => p.amenities.includes(a)));
   }
   if (filters.search) {
-    const esc = escapeFilterValue(filters.search);
-    query = query.or(`title.ilike.%${esc}%,description.ilike.%${esc}%,city.ilike.%${esc}%`);
+    const q = filters.search.toLowerCase().trim();
+    list = list.filter(
+      p =>
+        p.title.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q) ||
+        p.location.city.toLowerCase().includes(q) ||
+        p.location.address.toLowerCase().includes(q)
+    );
   }
 
-  // Sort
-  if (filters.sort_by === 'price_asc') query = query.order('price', { ascending: true });
-  else if (filters.sort_by === 'price_desc') query = query.order('price', { ascending: false });
-  else if (filters.sort_by === 'area_desc') query = query.order('area_sqft', { ascending: false });
-  else if (filters.sort_by === 'oldest') query = query.order('created_at', { ascending: true });
-  else query = query.order('created_at', { ascending: false });
+  // Sorting
+  switch (filters.sort_by) {
+    case 'price_asc':
+      list.sort((a, b) => a.price - b.price);
+      break;
+    case 'price_desc':
+      list.sort((a, b) => b.price - a.price);
+      break;
+    case 'area_desc':
+      list.sort((a, b) => b.area_sqft - a.area_sqft);
+      break;
+    case 'beds_desc':
+      list.sort((a, b) => b.bedrooms - a.bedrooms);
+      break;
+    case 'oldest':
+      list.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      break;
+    case 'newest':
+    default:
+      list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      break;
+  }
 
-  const { data, count, error } = await query;
-  if (error) throw error;
+  return { properties: list, total: list.length };
+}
 
-  return { properties: data || [], total: count || 0 };
+export async function getProperties(filters: PropertyFilters = {}): Promise<{ properties: Property[]; total: number }> {
+  // If Supabase is configured, try querying remote database
+  if (isSupabaseConfigured && supabase) {
+    try {
+      let query = supabase.from('properties').select('*, media:property_media(*)', { count: 'exact' });
+
+      if (filters.listing_status && filters.listing_status !== 'all') {
+        query = query.eq('listing_status', filters.listing_status);
+      }
+      if (filters.property_type && filters.property_type !== 'all') {
+        query = query.eq('property_type', filters.property_type);
+      }
+      if (filters.city && filters.city !== 'all') {
+        query = query.eq('city', filters.city);
+      }
+      if (filters.min_price) {
+        query = query.gte('price', filters.min_price);
+      }
+      if (filters.max_price) {
+        query = query.lte('price', filters.max_price);
+      }
+      if (filters.bedrooms && filters.bedrooms !== 'all') {
+        query = query.gte('bedrooms', filters.bedrooms);
+      }
+      if (filters.bathrooms && filters.bathrooms !== 'all') {
+        query = query.gte('bathrooms', filters.bathrooms);
+      }
+      if (filters.min_area) {
+        query = query.gte('area_sqft', filters.min_area);
+      }
+      if (filters.search) {
+        const esc = escapeFilterValue(filters.search);
+        query = query.or(`title.ilike.%${esc}%,description.ilike.%${esc}%,city.ilike.%${esc}%`);
+      }
+
+      if (filters.sort_by === 'price_asc') query = query.order('price', { ascending: true });
+      else if (filters.sort_by === 'price_desc') query = query.order('price', { ascending: false });
+      else if (filters.sort_by === 'area_desc') query = query.order('area_sqft', { ascending: false });
+      else if (filters.sort_by === 'oldest') query = query.order('created_at', { ascending: true });
+      else query = query.order('created_at', { ascending: false });
+
+      const { data, count, error } = await query;
+      if (!error && data && data.length > 0) {
+        return { properties: data, total: count || data.length };
+      }
+    } catch {
+      // Gracefully fall back to local properties store
+    }
+  }
+
+  // Local / Demo Mode filtering with local storage and INITIAL_PROPERTIES
+  return filterAndSortProperties(getLocalProperties(), filters);
 }
 
 export async function getFeaturedProperties(): Promise<Property[]> {
