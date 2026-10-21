@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { Logo } from '../components/common/Logo';
 import { Eye, EyeOff, Lock, Mail, User, ArrowLeft, CheckCircle2, ShieldCheck, Loader2 } from 'lucide-react';
 
 interface AuthPageProps {
@@ -30,6 +31,9 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
       <div className="bg-white border border-stone-200/90 rounded-2xl p-8 sm:p-10 shadow-xl max-w-md w-full space-y-6">
         <div className="text-center space-y-2">
+          <div className="flex justify-center mb-3">
+            <Logo variant="mark" size="lg" theme="light" />
+          </div>
           <span className="text-[10px] font-mono tracking-widest uppercase text-amber-800">
             Aura Estates Portal
           </span>
@@ -225,6 +229,9 @@ export const RegisterPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
     <div className="min-h-[75vh] flex items-center justify-center px-4 py-12">
       <div className="bg-white border border-stone-200/90 rounded-2xl p-8 sm:p-10 shadow-xl max-w-md w-full space-y-6">
         <div className="text-center space-y-2">
+          <div className="flex justify-center mb-3">
+            <Logo variant="mark" size="lg" theme="light" />
+          </div>
           <span className="text-[10px] font-mono tracking-widest uppercase text-amber-800">
             Aura Estates Registration
           </span>

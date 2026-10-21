@@ -1,5 +1,6 @@
 import React from 'react';
 import { siteConfig } from '../../config/site';
+import { Logo } from '../common/Logo';
 import { MapPin, Phone, Mail, Clock, ShieldCheck } from 'lucide-react';
 
 interface FooterProps {
@@ -13,14 +14,14 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           {/* Col 1: Brand & Identity */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 border border-amber-300/40 rounded-full flex items-center justify-center font-serif text-lg text-amber-200">
-                A
-              </div>
-              <span className="font-serif text-2xl tracking-widest uppercase text-stone-100">
-                {siteConfig.agency_name}
-              </span>
-            </div>
+            <button
+              type="button"
+              onClick={() => onNavigate('/')}
+              className="text-left cursor-pointer focus:outline-none"
+              aria-label="Aura Estates Home"
+            >
+              <Logo variant="horizontal" size="md" theme="dark" showTagline={true} />
+            </button>
             <p className="text-xs text-stone-400 leading-relaxed max-w-sm">
               An editorial showcase of world-class private residences, architecturally significant estates, and
               curated penthouses for discerning global collectors.

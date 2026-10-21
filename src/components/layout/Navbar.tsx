@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getLocalFavorites } from '../../services/favoriteService';
 import { siteConfig } from '../../config/site';
+import { Logo } from '../common/Logo';
 import {
   Heart,
   User,
@@ -100,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
           isScrolled
             ? 'bg-stone-900/90 text-stone-100 backdrop-blur-md shadow-md border-b border-stone-800'
             : isHome
-            ? 'bg-stone-950/40 text-stone-100 backdrop-blur-xs border-b border-white/10'
+            ? 'bg-stone-950/75 text-stone-100 backdrop-blur-md border-b border-white/10 shadow-sm'
             : 'bg-stone-900 text-stone-100 border-b border-stone-800'
         }`}
       >
@@ -109,19 +110,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
           <button
             type="button"
             onClick={() => handleNavClick('/')}
-            className="flex items-center gap-3 text-left cursor-pointer group"
+            className="text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400/50 rounded-lg"
+            aria-label="Aura Estates Home"
           >
-            <div className="w-10 h-10 border border-stone-400/40 rounded-full flex items-center justify-center font-serif text-xl tracking-widest text-amber-200 group-hover:border-amber-300 transition-colors">
-              A
-            </div>
-            <div>
-              <span className="font-serif text-2xl tracking-widest uppercase block leading-none text-stone-100 group-hover:text-amber-100 transition-colors">
-                {siteConfig.agency_name}
-              </span>
-              <span className="text-[10px] tracking-[0.25em] uppercase text-stone-400 block mt-1">
-                Private Residences
-              </span>
-            </div>
+            <Logo variant="horizontal" size="md" theme="dark" showTagline={true} />
           </button>
 
           {/* Desktop Navigation Links */}
@@ -261,7 +253,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="hidden sm:flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => handleNavClick('/login')}
@@ -338,6 +330,25 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
               >
                 Admin Back-Office
               </button>
+            )}
+
+            {!isAuthenticated && (
+              <div className="pt-4 border-t border-stone-800 flex flex-col gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => handleNavClick('/login')}
+                  className="w-full text-center py-2.5 rounded-lg border border-stone-700 text-stone-200 hover:text-white font-medium text-sm transition-colors"
+                >
+                  Sign In to Account
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleNavClick('/register')}
+                  className="w-full text-center py-2.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-sm shadow-md transition-colors"
+                >
+                  Register Client Profile
+                </button>
+              </div>
             )}
           </div>
         )}
