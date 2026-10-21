@@ -17,7 +17,7 @@ import { getLocalFavorites } from './services/favoriteService';
 import { Compass, ArrowLeft } from 'lucide-react';
 
 function AppRouter() {
-  const { user, isAdmin, isAuthenticated } = useAuth();
+  const { user, isAdmin, isAuthenticated, isLoading } = useAuth();
   const [currentPath, setCurrentPath] = useState(() => window.location.pathname || '/');
   const [currentSearch, setCurrentSearch] = useState(() => window.location.search || '');
   const [favoritesCount, setFavoritesCount] = useState(() => getLocalFavorites().length);
@@ -55,8 +55,41 @@ function AppRouter() {
     setEnquiryModalOpen(true);
   }, []);
 
-  // Determine current route view
+  // Route guards: never render protected pages until the Supabase session/profile check completes.
   const renderCurrentPage = () => {
+    if (isLoading) {
+      return (
+        <div className="min-h-[60vh] flex items-center justify-center" role="status" aria-live="polite">
+          <p className="text-sm text-stone-500">Verifying secure session…</p>
+        </div>
+      );
+    }
+
+    const isAdminOnlyRoute =
+      currentPath === '/admin' ||
+      ['/dashboard/properties', '/dashboard/inquiries', '/dashboard/users', '/dashboard/analytics', '/dashboard/settings'].includes(currentPath);
+
+    const isUserProtectedRoute = currentPath === '/profile' || currentPath === '/dashboard' || currentPath.startsWith('/dashboard/');
+    if (isUserProtectedRoute && !isAuthenticated) {
+      if (currentPath !== '/login') handleNavigate('/login?next=' + encodeURIComponent(currentPath));
+      return null;
+    }
+
+    if (isAdminOnlyRoute && !isAdmin) {
+      if (!isAuthenticated) {
+        if (currentPath !== '/login') handleNavigate('/login?next=' + encodeURIComponent(currentPath));
+        return null;
+      }
+      return (
+        <div className="max-w-2xl mx-auto px-4 py-24 text-center space-y-4">
+          <h2 className="font-serif text-3xl text-stone-900">Access Restricted</h2>
+          <p className="text-sm text-stone-500">This page is reserved for authorized administrators.</p>
+          <button type="button" onClick={() => handleNavigate('/dashboard')} className="bg-stone-900 text-white px-6 py-3 rounded-full">
+            Return to dashboard
+          </button>
+        </div>
+      );
+    }
     // 1. Property Detail Page: /property/:slug
     if (currentPath.startsWith('/property/')) {
       const slug = currentPath.replace('/property/', '').trim();
