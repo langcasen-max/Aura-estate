@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Logo } from '../components/common/Logo';
+import { isDesignatedAdminEmail } from '../lib/security';
 import { Eye, EyeOff, Lock, Mail, User, ArrowLeft, CheckCircle2, ShieldCheck, Loader2 } from 'lucide-react';
 
 interface AuthPageProps {
@@ -14,16 +15,27 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
     setError(null);
     try {
-      await signIn(email, password);
+      const authUser = await signIn(email, password);
       const requestedPath = new URLSearchParams(window.location.search).get('next');
-      const safePath = requestedPath && requestedPath.startsWith('/') && !requestedPath.startsWith('//') ? requestedPath : '/dashboard';
-      onNavigate(safePath);
+      if (requestedPath && requestedPath.startsWith('/') && !requestedPath.startsWith('//')) {
+        onNavigate(requestedPath);
+      } else {
+        // If logged in as admin, route directly into the Admin Operations Console
+        if (authUser?.role === 'admin' || isDesignatedAdminEmail(email)) {
+          onNavigate('/admin');
+        } else {
+          onNavigate('/dashboard');
+        }
+      }
     } catch (err: any) {
-      setError(err.message || 'Invalid credentials. Please verify your email and password.');
+      console.warn('[Login Error]:', err?.message || err);
+      setError(err?.message || 'Invalid credentials. Please verify your email and password.');
     }
   };
 
@@ -49,7 +61,7 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">
               Email Address
@@ -85,6 +97,12 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void handleSubmit();
+                  }
+                }}
                 className="w-full h-11 pl-10 pr-10 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:outline-none focus:border-stone-800"
               />
               <Lock className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
@@ -100,19 +118,50 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onClick={() => void handleSubmit()}
             disabled={isLoading}
             className="w-full bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white font-bold text-xs py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Sign In to Account</span>}
           </button>
-        </form>
+        </div>
+
+        {/* Configured Supabase Administrator Account */}
+        <div className="p-3.5 bg-amber-500/10 border border-amber-500/25 rounded-xl space-y-2 text-left">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+              <ShieldCheck className="w-4 h-4 text-amber-700" />
+              Configured Admin Account
+            </span>
+            <span className="text-[10px] font-mono text-amber-800 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300/60 font-semibold">
+              Live Supabase Auth
+            </span>
+          </div>
+          <p className="text-xs text-stone-700 leading-relaxed">
+            Admin Email: <strong className="text-stone-900 font-mono font-bold">bearbates512@gmail.com</strong>
+          </p>
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('bearbates512@gmail.com');
+                const pwdInput = document.querySelector('input[type="password"]') as HTMLInputElement;
+                if (pwdInput) pwdInput.focus();
+              }}
+              className="text-xs text-amber-800 hover:text-amber-950 font-bold underline cursor-pointer"
+            >
+              Fill bearbates512@gmail.com
+            </button>
+            <span className="text-[10px] text-stone-500 italic">Enter your Supabase password</span>
+          </div>
+        </div>
 
         {/* Demo Quick Sign-In Options */}
         <div className="pt-2 border-t border-stone-100 space-y-2">
           <div className="flex items-center justify-between text-[11px] text-stone-500 font-medium">
-            <span>Instant Demo Access</span>
-            <span className="text-[10px] font-mono text-amber-700 uppercase tracking-wider bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">Ready to test</span>
+            <span>Offline Demo Sandbox</span>
+            <span className="text-[10px] font-mono text-amber-700 uppercase tracking-wider bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">Local test</span>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <button

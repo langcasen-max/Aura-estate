@@ -377,6 +377,16 @@ export const INITIAL_INQUIRIES: PropertyInquiry[] = [
 
 export const INITIAL_USERS: UserProfile[] = [
   {
+    id: 'usr-admin-bearbates',
+    email: 'bearbates512@gmail.com',
+    full_name: 'Administrator',
+    phone: '+1 (310) 555-0190',
+    avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+    role: 'admin',
+    created_at: '2026-08-01T09:00:00Z',
+    inquiry_count: 0,
+  },
+  {
     id: 'usr-admin-1',
     email: 'admin@auraestates.luxury',
     full_name: 'Julian Montgomery',

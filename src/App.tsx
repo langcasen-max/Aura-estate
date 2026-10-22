@@ -57,7 +57,12 @@ function AppRouter() {
 
   // Route guards: never render protected pages until the Supabase session/profile check completes.
   const renderCurrentPage = () => {
-    if (isLoading) {
+    const isProtectedRoute =
+      currentPath === '/admin' ||
+      currentPath === '/profile' ||
+      currentPath.startsWith('/dashboard');
+
+    if (isLoading && isProtectedRoute && !user) {
       return (
         <div className="min-h-[60vh] flex items-center justify-center" role="status" aria-live="polite">
           <p className="text-sm text-stone-500">Verifying secure session…</p>

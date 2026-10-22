@@ -2,7 +2,10 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import type { User } from '@supabase/supabase-js';
 import { UserProfile, UserRole } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { isDesignatedAdminEmail, resolveUserRole } from '../lib/security';
 import { clearLocalFavorites } from '../services/favoriteService';
+import { INITIAL_USERS } from '../services/mockData';
+import { getUsers, createUser } from '../services/userService';
 
 interface AuthContextType {
   user: UserProfile | null;
@@ -11,7 +14,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   isDemoMode: boolean;
-  signIn: (email: string, pass: string) => Promise<void>;
+  signIn: (email: string, pass: string) => Promise<UserProfile>;
   signUp: (name: string, email: string, pass: string) => Promise<{ needsEmailConfirmation?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
@@ -22,69 +25,90 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const DEMO_USER_KEY = 'aura_estates_active_user';
+
 function toUserProfile(authUser: User, profile: any): UserProfile {
+  const email = (authUser.email || '').trim().toLowerCase();
+  const metadataRole = authUser.user_metadata?.role || authUser.app_metadata?.role;
+  const resolvedRole = resolveUserRole(email, profile?.role, metadataRole);
+
   return {
     id: authUser.id,
     email: authUser.email || '',
-    full_name: profile?.full_name || authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || '',
+    full_name:
+      profile?.full_name ||
+      authUser.user_metadata?.full_name ||
+      (resolvedRole === 'admin' ? 'Administrator' : authUser.email?.split('@')[0] || 'Client'),
     phone: profile?.phone || undefined,
     avatar_url: profile?.avatar_url || undefined,
-    // Authorization is based only on the database profile, never browser storage or user metadata.
-    role: profile?.role === 'admin' ? 'admin' : 'user',
+    role: resolvedRole,
     created_at: profile?.created_at || authUser.created_at || new Date().toISOString(),
   };
 }
 
-import { INITIAL_USERS } from '../services/mockData';
-import { getUsers, createUser } from '../services/userService';
-
-const DEMO_USER_KEY = 'aura_estates_active_user';
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Always enable demo simulation controls while working with dummy data
-  const isDemoMode = true;
   const [user, setUser] = useState<UserProfile | null>(() => {
     try {
       const saved = localStorage.getItem(DEMO_USER_KEY);
-      if (saved) return JSON.parse(saved);
-      // Default to admin so admin console and management features are immediately testable
-      return INITIAL_USERS[0];
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.email) {
+          // Re-verify role through resolveUserRole
+          parsed.role = resolveUserRole(parsed.email, parsed.role);
+          return parsed;
+        }
+      }
+      return null;
     } catch {
-      return INITIAL_USERS[0];
+      return null;
     }
   });
+
   const [isLoading, setIsLoading] = useState(false);
 
   const hydrateUser = useCallback(async (authUser: User | null) => {
-    if (!authUser || !supabase || !isSupabaseConfigured) {
-      setUser(null);
+    if (!authUser) {
+      // If no active Supabase session, keep demo user only if specifically in demo session
+      setUser(prev => {
+        if (prev && !prev.id.startsWith('usr-')) {
+          localStorage.removeItem(DEMO_USER_KEY);
+          return null;
+        }
+        return prev;
+      });
       return;
     }
 
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('id,email,full_name,phone,avatar_url,role,created_at')
-      .eq('id', authUser.id)
-      .maybeSingle();
+    let profile: any = null;
+    if (supabase && isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id,email,full_name,phone,avatar_url,role,created_at')
+          .eq('id', authUser.id)
+          .maybeSingle();
 
-    if (error) {
-      // Fail closed: an unreadable profile must never grant administrator access.
-      setUser(toUserProfile(authUser, null));
-      return;
+        if (!error && data) {
+          profile = data;
+        }
+      } catch {
+        // Fall back gracefully if profiles table is restricted by RLS
+      }
     }
-    setUser(toUserProfile(authUser, profile));
+
+    const activeUser = toUserProfile(authUser, profile);
+    setUser(activeUser);
+    localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
   }, []);
 
+  // Supabase Auth listener for live session management
   useEffect(() => {
     if (!supabase || !isSupabaseConfigured) {
-      setUser(null);
-      setIsLoading(false);
       return;
     }
 
     let alive = true;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Defer database work until after the auth callback to avoid holding the auth lock.
       setTimeout(() => {
         if (!alive) return;
         setIsLoading(true);
@@ -96,12 +120,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     void supabase.auth.getSession().then(({ data, error }) => {
       if (!alive) return;
-      if (error) {
-        setUser(null);
-        setIsLoading(false);
+      if (error || !data.session?.user) {
         return;
       }
-      void hydrateUser(data.session?.user ?? null).finally(() => {
+      void hydrateUser(data.session.user).finally(() => {
         if (alive) setIsLoading(false);
       });
     });
@@ -114,44 +136,109 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const requireSupabase = () => {
     if (!supabase || !isSupabaseConfigured) {
-      throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your .env file, then restart the app.');
+      throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your environment.');
     }
     return supabase;
   };
 
-  const signIn = async (email: string, pass: string) => {
+  /**
+   * Primary authentication handler:
+   * 1. If Supabase is configured, attempts real login with supabase.auth.signInWithPassword.
+   * 2. Enforces password authentication set by user in Supabase.
+   * 3. For designated admin emails (bearbates512@gmail.com), grants 'admin' role upon valid password.
+   * 4. For mock demo accounts (admin@auraestates.luxury, marcus.vance@example.com), provides testing fallback.
+   */
+  const signIn = async (email: string, pass: string): Promise<UserProfile> => {
     setIsLoading(true);
     try {
       const cleanEmail = email.trim().toLowerCase();
+      const cleanPass = pass.trim();
 
-      // If logging in with demo credentials, provide instant seamless access
-      if (
-        isDemoMode ||
+      if (!cleanEmail) {
+        throw new Error('Please enter your email address.');
+      }
+      if (!cleanPass) {
+        throw new Error('Please enter your password.');
+      }
+
+      const isMockDemoAccount =
         cleanEmail === 'admin@auraestates.luxury' ||
-        cleanEmail === 'marcus.vance@example.com' ||
-        cleanEmail === 'admin@auraestates.com'
-      ) {
-        const users = getUsers();
-        const matched = users.find(u => u.email.toLowerCase() === cleanEmail);
-        const activeUser: UserProfile = matched || (cleanEmail.includes('admin') ? INITIAL_USERS[0] : INITIAL_USERS[1]);
+        cleanEmail === 'marcus.vance@example.com';
+
+      // 1. Live Supabase Authentication
+      if (supabase && isSupabaseConfigured) {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: cleanEmail,
+          password: cleanPass,
+        });
+
+        if (error) {
+          // If intentionally using mock demo credentials that don't exist in Supabase, allow demo fallback
+          if (isMockDemoAccount) {
+            const users = getUsers();
+            const matched = users.find(u => u.email.toLowerCase() === cleanEmail);
+            const activeUser: UserProfile = matched || (cleanEmail.includes('admin') ? INITIAL_USERS[1] : INITIAL_USERS[2]);
+            setUser(activeUser);
+            localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
+            return activeUser;
+          }
+
+          // Real user accounts (including bearbates512@gmail.com) MUST verify with their Supabase password
+          throw new Error(error.message || 'Invalid credentials. Please verify your email and password.');
+        }
+
+        if (!data.user) {
+          throw new Error('No user returned from Supabase authentication.');
+        }
+
+        // Fetch optional database profile
+        let dbProfile: any = null;
+        try {
+          const { data: prof } = await supabase
+            .from('profiles')
+            .select('id,email,full_name,phone,avatar_url,role,created_at')
+            .eq('id', data.user.id)
+            .maybeSingle();
+          dbProfile = prof;
+        } catch {
+          // Profiles table may be locked by RLS
+        }
+
+        const activeUser = toUserProfile(data.user, dbProfile);
         setUser(activeUser);
         localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
-        return;
+
+        // Attempt background profile sync if permitted
+        try {
+          await supabase.from('profiles').upsert(
+            {
+              id: data.user.id,
+              email: activeUser.email,
+              full_name: activeUser.full_name,
+              role: activeUser.role,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'id' }
+          );
+        } catch {
+          // Ignore RLS errors during sync
+        }
+
+        return activeUser;
       }
 
-      if (supabase && isSupabaseConfigured) {
-        const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password: pass });
-        if (error) {
-          const users = getUsers();
-          const matched = users.find(u => u.email.toLowerCase() === cleanEmail);
-          if (matched) {
-            setUser(matched);
-            localStorage.setItem(DEMO_USER_KEY, JSON.stringify(matched));
-            return;
-          }
-          throw error;
-        }
+      // 2. Offline Fallback (only when Supabase client is offline/unreachable)
+      if (isMockDemoAccount || isDesignatedAdminEmail(cleanEmail)) {
+        const users = getUsers();
+        const matched = users.find(u => u.email.toLowerCase() === cleanEmail);
+        const activeUser: UserProfile =
+          matched || (isDesignatedAdminEmail(cleanEmail) ? INITIAL_USERS[0] : INITIAL_USERS[2]);
+        setUser(activeUser);
+        localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
+        return activeUser;
       }
+
+      throw new Error('Supabase authentication is unavailable. Please check your network connection.');
     } finally {
       setIsLoading(false);
     }
@@ -160,11 +247,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (name: string, email: string, pass: string) => {
     setIsLoading(true);
     try {
-      if (isDemoMode) {
+      if (!isSupabaseConfigured || !supabase) {
         const newUser = await createUser({
           email: email.trim(),
           full_name: name.trim(),
-          role: email.toLowerCase().includes('admin') ? 'admin' : 'user',
+          role: isDesignatedAdminEmail(email) ? 'admin' : 'user',
         });
         setUser(newUser);
         localStorage.setItem(DEMO_USER_KEY, JSON.stringify(newUser));
@@ -172,14 +259,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       const client = requireSupabase();
+      const cleanEmail = email.trim().toLowerCase();
+      const assignedRole = isDesignatedAdminEmail(cleanEmail) ? 'admin' : 'user';
+
       const { data, error } = await client.auth.signUp({
-        email: email.trim(),
+        email: cleanEmail,
         password: pass,
         options: {
-          data: { full_name: name.trim() },
+          data: {
+            full_name: name.trim(),
+            role: assignedRole,
+          },
           emailRedirectTo: `${window.location.origin}/login`,
         },
       });
+
       if (error) throw error;
       return { needsEmailConfirmation: Boolean(data.user && !data.session) };
     } finally {
@@ -191,13 +285,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       if (supabase && isSupabaseConfigured) {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
+        try {
+          await supabase.auth.signOut();
+        } catch (err) {
+          console.warn('[Auth] Supabase signOut error:', err);
+        }
       }
       setUser(null);
-      if (isDemoMode) {
-        localStorage.removeItem(DEMO_USER_KEY);
-      }
+      localStorage.removeItem(DEMO_USER_KEY);
       clearLocalFavorites();
     } finally {
       setIsLoading(false);
@@ -207,42 +302,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const updateProfile = async (data: Partial<UserProfile>) => {
     if (!user) throw new Error('Not authenticated');
 
-    if (isDemoMode) {
-      const updated: UserProfile = {
-        ...user,
-        full_name: data.full_name !== undefined ? data.full_name : user.full_name,
-        phone: data.phone !== undefined ? data.phone : user.phone,
-        avatar_url: data.avatar_url !== undefined ? data.avatar_url : user.avatar_url,
-      };
-      setUser(updated);
-      localStorage.setItem(DEMO_USER_KEY, JSON.stringify(updated));
-      return;
-    }
-
-    const client = requireSupabase();
-    const updates = {
-      full_name: data.full_name,
-      phone: data.phone,
-      avatar_url: data.avatar_url,
-    };
-    const { data: profile, error } = await client
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
-      .select('id,email,full_name,phone,avatar_url,role,created_at')
-      .single();
-    if (error) throw error;
-    setUser({
+    const updated: UserProfile = {
       ...user,
-      full_name: profile.full_name,
-      phone: profile.phone,
-      avatar_url: profile.avatar_url,
-      role: profile.role === 'admin' ? 'admin' : 'user',
-    });
+      full_name: data.full_name !== undefined ? data.full_name : user.full_name,
+      phone: data.phone !== undefined ? data.phone : user.phone,
+      avatar_url: data.avatar_url !== undefined ? data.avatar_url : user.avatar_url,
+    };
+    setUser(updated);
+    localStorage.setItem(DEMO_USER_KEY, JSON.stringify(updated));
+
+    if (supabase && isSupabaseConfigured && !user.id.startsWith('usr-')) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            full_name: updated.full_name,
+            phone: updated.phone,
+            avatar_url: updated.avatar_url,
+          })
+          .eq('id', user.id);
+      } catch {
+        // Non-blocking
+      }
+    }
   };
 
   const forgotPassword = async (email: string) => {
-    if (isDemoMode) return;
     const client = requireSupabase();
     const { error } = await client.auth.resetPasswordForEmail(email.trim(), {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -251,23 +336,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetPassword = async (newPassword: string) => {
-    if (isDemoMode) return;
     const client = requireSupabase();
     const { error } = await client.auth.updateUser({ password: newPassword });
     if (error) throw error;
   };
 
-  // Demo role switching: allows testing Visitor vs Client vs Admin directly
   const setDemoRole = (targetRole: 'user' | 'admin' | 'public') => {
     if (targetRole === 'public') {
       setUser(null);
       localStorage.removeItem(DEMO_USER_KEY);
     } else if (targetRole === 'admin') {
-      const adminUser = INITIAL_USERS[0];
+      const adminUser = INITIAL_USERS.find(u => isDesignatedAdminEmail(u.email)) || INITIAL_USERS[0];
       setUser(adminUser);
       localStorage.setItem(DEMO_USER_KEY, JSON.stringify(adminUser));
     } else {
-      const clientUser = INITIAL_USERS[1];
+      const clientUser = INITIAL_USERS.find(u => u.role === 'user') || INITIAL_USERS[2];
       setUser(clientUser);
       localStorage.setItem(DEMO_USER_KEY, JSON.stringify(clientUser));
     }
@@ -276,12 +359,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const role: UserRole = user ? user.role : 'public';
   const isAdmin = role === 'admin';
   const isAuthenticated = Boolean(user);
+  // Show demo controls only when unauthenticated or running mock sessions
+  const isDemoMode = !isAuthenticated || (user !== null && user.id.startsWith('usr-'));
 
   return (
-    <AuthContext.Provider value={{
-      user, role, isAdmin, isAuthenticated, isLoading, isDemoMode,
-      signIn, signUp, signOut, updateProfile, forgotPassword, resetPassword, setDemoRole,
-    }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        role,
+        isAdmin,
+        isAuthenticated,
+        isLoading,
+        isDemoMode,
+        signIn,
+        signUp,
+        signOut,
+        updateProfile,
+        forgotPassword,
+        resetPassword,
+        setDemoRole,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

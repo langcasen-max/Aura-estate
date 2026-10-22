@@ -2,6 +2,43 @@
  * Security and sanitization utilities
  */
 
+/**
+ * Designated administrative email addresses authorized for the Admin Operations Console.
+ * Explicitly includes bearbates512@gmail.com as requested by the user.
+ */
+export const DESIGNATED_ADMIN_EMAILS: readonly string[] = [
+  'bearbates512@gmail.com',
+  'admin@auraestates.luxury',
+  'admin@auraestates.com',
+];
+
+/**
+ * Checks whether an email address belongs to a designated administrator (case-insensitive)
+ */
+export function isDesignatedAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const clean = email.trim().toLowerCase();
+  return DESIGNATED_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === clean);
+}
+
+/**
+ * Resolves user role based on email, database profile role, and Supabase metadata.
+ * Designated admin emails (like bearbates512@gmail.com) are guaranteed 'admin' role.
+ */
+export function resolveUserRole(
+  email?: string | null,
+  profileRole?: string | null,
+  metadataRole?: string | null
+): 'admin' | 'user' {
+  if (isDesignatedAdminEmail(email)) {
+    return 'admin';
+  }
+  if (profileRole === 'admin' || metadataRole === 'admin') {
+    return 'admin';
+  }
+  return 'user';
+}
+
 export function isValidEmail(email: string): boolean {
   if (!email) return false;
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
