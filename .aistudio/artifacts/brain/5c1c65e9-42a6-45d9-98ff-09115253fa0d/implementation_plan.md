@@ -1,55 +1,47 @@
-# Light Mode Theme System & Header Toggle Implementation Plan
+# Admin Credentials Privacy & Security Hardening Implementation Plan
 
-Introduce a comprehensive Light Mode as the primary default theme across the Sadiqabad Real Estate application, complete with an interactive Theme Toggle (Sun/Moon) in the header navigation, persisting preferences in `localStorage`, and styling the navigation bar and footer in a soft ivory stone palette with warm golden accents.
+Completely remove all visible displays of administrator credentials (email, password, and auto-fill helpers) from the login interface and public website, ensuring the admin credentials remain strictly private and accessible only to the authorized administrator.
 
 ### User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The user confirmed that **Light Mode will be the default theme** with a **Theme Toggle button in the header**, and that the navigation bar and footer will feature a **soft ivory stone background with warm golden accents**.
+> The user confirmed that **the admin email and password must not be displayed anywhere on the website**, as they are strictly confidential and known only to the site administrator.
 
-- **Confirmed Decision 1**: Default theme is Light Mode, with instant switching to Dark Mode via a header toggle button.
-- **Confirmed Decision 2**: Navigation bar and footer styled with soft ivory stone surfaces (`#FBF9F5` / `#F6F3ED`) and warm golden accents (`amber-800` / `amber-900/10` borders) in Light Mode, transitioning smoothly to obsidian stone in Dark Mode.
-- **Persistence Strategy**: User theme selection saved to `localStorage` under key `'sadiqabad_theme'` with automatic root HTML class management.
+- **Confirmed Decision 1**: Completely remove the "Exclusive Admin Credentials" banner, email (`langcasen@gmail.com`), password (`office@12`), and the "Auto-fill Admin Credentials" button from the login portal (`src/pages/AuthPages.tsx`).
+- **Confirmed Decision 2**: Remove the demo/client test login card ("Client Portal Test") to present a clean, production-grade, and secure authentication screen.
+- **Preserved Backend & Auth Logic**: Keep the underlying authentication authentication logic in `src/contexts/AuthContext.tsx` and `src/lib/security.ts` completely intact. The administrator can continue to securely log in by entering their credentials (`langcasen@gmail.com` / `office@12`) in the input fields, and will immediately receive full administrator privileges and access to the `/admin` Operations Console.
 
 ---
 
 ### 1. Overview & Core Concept
 
 - **What It Does**:
-  1. Implements a React `ThemeProvider` and `useTheme()` hook managing `'light' | 'dark'` modes.
-  2. Embeds an interactive Sun/Moon Theme Toggle in the top navigation bar with smooth micro-interactions.
-  3. Styles the entire navigation bar, mobile drawer, footer, and page canvases in a soft ivory stone aesthetic with warm gold accents for Light Mode, while preserving full high-contrast luxury styling for Dark Mode.
-  4. Adapts brand wordmark logo, navigation links, and dropdown menus seamlessly between Light and Dark modes.
-- **Target Audience**: Sadiqabad residents, overseas Pakistanis, and property investors browsing properties during daytime or nighttime.
-- **Key Value**: Superior visual comfort, clean daytime readability, and effortless personal control over website atmosphere.
+  1. Purges all demo credential banners, visible email/password helper text, and auto-fill buttons from the public `/login` interface.
+  2. Ensures that no sensitive administrative credentials or hints appear in any rendered UI component, footer, modal, or page view.
+  3. Preserves full authentication functionality so that authorized administrator credentials remain functional upon typing them into the form.
+- **Target Audience**: Sadiqabad Real Estate administration and public clients visiting the production website.
+- **Key Value**: Security, privacy, and production-grade professionalism. Unauthorized visitors will have zero visibility into administrative login details.
 
 ---
 
 ### 2. User Experience & Visual Design
 
-#### Visual Palette (Light Mode - Soft Ivory Stone & Warm Gold)
-- **Canvas / Background**: `#FBF9F5` (Soft Ivory Stone)
-- **Header Surface**: `#FBF9F5/95` with backdrop blur, fine hairline border `rgba(180, 83, 9, 0.12)`
-- **Footer Surface**: `#F6F3ED` with warm golden accents and dark charcoal typography (`stone-800`)
-- **Primary Typography**: Charcoal & Deep Espresso (`stone-900`, `stone-800`)
-- **Warm Golden Accents**: Rich Ochre & Amber (`amber-700`, `amber-800`)
-- **Interactive Theme Toggle**: Dedicated round pill button with Sun (`lucide:Sun`) and Moon (`lucide:Moon`) icons, smooth 200ms transform transition.
-
-#### Visual Palette (Dark Mode - Deep Obsidian & Gold)
-- **Canvas / Background**: `#0C0A09` (`stone-950`)
-- **Header Surface**: `stone-900/90` with hairline border `stone-800`
-- **Footer Surface**: `stone-950` with muted stone typography and warm amber highlights
+#### Streamlined Production Login Interface
+- **Branded Card Header**: Retains the refined Aura Estates / Sadiqabad Real Estate mark and clear title ("Client & Admin Sign In").
+- **Inputs**: Clean, polished Email and Password input fields with toggleable eye icon for password visibility.
+- **Action**: Single high-contrast "Sign In to Account" button with loading spinner state.
+- **Clean Footer**: Simple link to register or recover password if needed, without any credential disclosure boxes.
 
 ---
 
-### 3. Key Product Decisions & Trade-Offs
+### 3. Key Decisions & Security Architecture
 
-- **Decision 1: React Theme Context with HTML Class Sync**
-  - *Chosen Approach*: `ThemeContext` injecting/removing `.dark` class on `document.documentElement` and persisting in `localStorage`.
-  - *Why*: Tailwind v4 and standard CSS utilities seamlessly respond to `.dark` class hierarchy without full-page reloads or flickering.
-- **Decision 2: Top Bar Contract Compliance**
-  - *Chosen Approach*: Place the Theme Toggle cleanly inside Zone 3 (Action zone) adjacent to Favorites and User Account icon.
-  - *Why*: Preserves the strict 3-zone Top Bar contract (Brand Wordmark — Nav Links — Action Zone) without cluttering brand identity.
+- **Decision 1: Complete Removal from Public DOM**
+  - *Chosen Approach*: Strip out the `Exclusive Admin Credentials` container and `Client Portal Test` container from JSX in `src/pages/AuthPages.tsx`.
+  - *Why*: Eliminates accidental credential exposure in production deployments on Cloudflare Pages and ensures standard security best practices.
+- **Decision 2: Retention of Authentication Handlers**
+  - *Chosen Approach*: Maintain full compatibility in `AuthContext` and `security.ts` so `langcasen@gmail.com` logging in with `office@12` routes seamlessly to `/admin`.
+  - *Why*: The admin can still log into their portal without any disruption to administrative tools, property management, or inquiry reviews.
 
 ---
 
@@ -57,52 +49,42 @@ Introduce a comprehensive Light Mode as the primary default theme across the Sad
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│                      App Root                          │
-│   <AuthProvider>                                       │
-│     <ThemeProvider default="light">                    │
-│       <AppRouter>                                      │
+│               Public Sign-In Page (/login)             │
+│                                                        │
+│  [ Brand Logo ]                                        │
+│  [ Title: Sign In ]                                    │
+│                                                        │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │ Email Input: [ User enters admin or client email ]│  │
+│  │ Password Input: [ User enters private password ]  │  │
+│  │                                                  │  │
+│  │ [ Sign In Button ]                               │  │
+│  └──────────────────────────────────────────────────┘  │
+│                                                        │
+│  [ ✘ REMOVED: Visible Admin Email & Password Box ]     │
+│  [ ✘ REMOVED: Auto-fill Credentials Button ]           │
+│  [ ✘ REMOVED: Demo Test Account Banners ]              │
 └──────────────────────────┬─────────────────────────────┘
-                           │ Provides { theme, toggleTheme, isDark }
+                           │ Authenticates via AuthContext
                            ▼
 ┌────────────────────────────────────────────────────────┐
-│                       Navbar                           │
-│   [Zone 1: Logo] ─── [Zone 2: Links] ─── [Zone 3: Acts]│
-│                                           ├── Favorites│
-│                                           ├── ThemeBtn │ ◄── [Sun / Moon]
-│                                           └── Auth/User│
-└──────────────────────────┬─────────────────────────────┘
-                           │
-             ┌─────────────┴─────────────┐
-             ▼                           ▼
-┌─────────────────────────┐ ┌─────────────────────────┐
-│     Light Mode Theme    │ │     Dark Mode Theme     │
-│ • Canvas: #FBF9F5       │ │ • Canvas: stone-950     │
-│ • Header: Ivory Stone   │ │ • Header: Obsidian      │
-│ • Footer: #F6F3ED       │ │ • Footer: Deep Stone    │
-│ • Gold: amber-800       │ │ • Gold: amber-400       │
-└─────────────────────────┘ └─────────────────────────┘
+│                    Auth Pipeline                       │
+│  • Compares entered credentials securely               │
+│  • If email === 'langcasen@gmail.com':                 │
+│      -> Grants Role: 'admin'                           │
+│      -> Redirects to '/admin' Operations Console       │
+│  • If client user:                                     │
+│      -> Grants Role: 'client'                          │
+│      -> Redirects to '/dashboard'                      │
+└────────────────────────────────────────────────────────┘
 ```
 
-#### Files to Create & Update
+#### Files to Update
 
-1. **`src/contexts/ThemeContext.tsx`** (New):
-   - Defines `'light' | 'dark'` state, `toggleTheme`, `isDark`.
-   - Reads/writes to `localStorage.getItem('sadiqabad_theme')`.
-   - Defaults to `'light'`.
-2. **`src/components/layout/Navbar.tsx`**:
-   - Integrates Theme Toggle button with Sun/Moon icon.
-   - Supports ivory stone background in Light Mode and obsidian in Dark Mode.
-   - Adjusts mobile menu drawer colors to match active theme.
-3. **`src/components/common/Logo.tsx`**:
-   - Adapts wordmark typography color dynamically based on theme.
-4. **`src/components/layout/Footer.tsx`**:
-   - Adapts to soft ivory stone surface (`#F6F3ED`) with warm golden accents when in Light Mode.
-5. **`src/App.tsx`**:
-   - Wraps the app in `<ThemeProvider>`.
-   - Updates main layout background classes to support light/dark transitions.
-
-#### Verification Plan
-
-1. Verify `compile_applet` succeeds without errors.
-2. Verify `lint_applet` passes cleanly.
-3. Test toggling between Light Mode and Dark Mode; verify `localStorage` persistence and aesthetic visual transitions across all pages (Home, Properties, Detail, About, Contact, Admin).
+1. **`src/pages/AuthPages.tsx`**:
+   - Remove the `Exclusive Admin Credentials` container (lines 130–158).
+   - Remove the `Demo Client Access` container (lines 160–180).
+   - Clean up unused imports (such as `ShieldCheck`).
+2. **Verification & Audit**:
+   - Audit all files in `src/` to ensure no other component renders credential text in the UI.
+   - Run `compile_applet` and `lint_applet` to confirm zero regressions and a clean build.

@@ -10,7 +10,12 @@ export function getSiteSettings(): SiteSettings {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(siteConfig));
       return siteConfig;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (parsed.email === 'langcasen@gmail.com') {
+      parsed.email = siteConfig.email;
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));
+    }
+    return parsed;
   } catch {
     return siteConfig;
   }
