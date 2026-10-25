@@ -238,7 +238,7 @@ export const Logo: React.FC<LogoProps> = ({
               Sadiqabad City Properties
             </span>
             <span className="w-1 h-1 rounded-full bg-amber-400 hidden md:inline-block shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
-            <span className="text-[8px] tracking-[0.22em] uppercase text-stone-300 font-mono hidden md:inline-block opacity-75">
+            <span className={`text-[8px] tracking-[0.22em] uppercase font-mono hidden md:inline-block opacity-75 ${isLight ? 'text-stone-600' : 'text-stone-300'}`}>
               Verified Properties
             </span>
           </div>

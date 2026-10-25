@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { HomePage } from './pages/HomePage';
@@ -244,7 +245,7 @@ function AppRouter() {
   const isAdminRoute = currentPath === '/admin' || (currentPath.startsWith('/dashboard') && isAdmin);
 
   return (
-    <div className="min-h-screen flex flex-col bg-stone-50 text-stone-900 selection:bg-stone-800 selection:text-stone-100">
+    <div className="min-h-screen flex flex-col bg-[#FBF9F5] text-stone-900 dark:bg-stone-950 dark:text-stone-100 selection:bg-amber-600 selection:text-white transition-colors duration-200">
       {/* Top Navbar */}
       <Navbar
         currentPath={currentPath}
@@ -274,7 +275,9 @@ function AppRouter() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppRouter />
+      <ThemeProvider>
+        <AppRouter />
+      </ThemeProvider>
     </AuthProvider>
   );
 }

@@ -159,15 +159,15 @@ export const HomePage: React.FC<HomePageProps> = ({
 
       {/* Sadiqabad Localities Showcase Strip */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-stone-100 rounded-2xl p-8 sm:p-10 border border-stone-200">
+        <div className="bg-[#F5F0E6] dark:bg-stone-900 rounded-2xl p-8 sm:p-10 border border-amber-900/10 dark:border-stone-800">
           <div className="max-w-2xl mb-8">
-            <span className="text-xs font-mono tracking-widest uppercase text-emerald-800 font-bold block mb-1">
+            <span className="text-xs font-mono tracking-widest uppercase text-emerald-800 dark:text-emerald-400 font-bold block mb-1">
               Top Residential & Commercial Sectors
             </span>
-            <h3 className="font-serif text-2xl sm:text-3xl text-stone-900">
+            <h3 className="font-serif text-2xl sm:text-3xl text-stone-900 dark:text-stone-100">
               Explore Sadiqabad Localities
             </h3>
-            <p className="text-xs sm:text-sm text-stone-600 mt-2">
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 mt-2">
               Select an area to explore verified properties with Sui Gas, sweet drinking water, and carpeted access roads.
             </p>
           </div>
@@ -178,13 +178,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                 key={loc}
                 type="button"
                 onClick={() => onNavigate(`/properties?locality=${encodeURIComponent(loc)}`)}
-                className="p-4 bg-white hover:bg-emerald-50 rounded-xl border border-stone-200 hover:border-emerald-300 transition-all text-left group cursor-pointer shadow-2xs"
+                className="p-4 bg-white dark:bg-stone-800 hover:bg-emerald-50 dark:hover:bg-stone-700/80 rounded-xl border border-stone-200 dark:border-stone-700 hover:border-emerald-300 transition-all text-left group cursor-pointer shadow-2xs"
               >
                 <div className="flex items-center gap-2 mb-1.5">
                   <MapPin className="w-4 h-4 text-emerald-600 group-hover:scale-110 transition-transform" />
-                  <span className="font-bold text-xs text-stone-900 group-hover:text-emerald-900">{loc}</span>
+                  <span className="font-bold text-xs text-stone-900 dark:text-stone-100 group-hover:text-emerald-900 dark:group-hover:text-emerald-300">{loc}</span>
                 </div>
-                <span className="text-[11px] text-stone-500">Sadiqabad, Punjab</span>
+                <span className="text-[11px] text-stone-500 dark:text-stone-400">Sadiqabad, Punjab</span>
               </button>
             ))}
           </div>
@@ -192,57 +192,57 @@ export const HomePage: React.FC<HomePageProps> = ({
       </section>
 
       {/* Sadiqabad Trust & Services Strip */}
-      <section className="bg-stone-900 text-stone-100 py-16 border-y border-stone-800">
+      <section className="bg-[#F2ECE1] dark:bg-stone-900 text-stone-900 dark:text-stone-100 py-16 border-y border-amber-900/10 dark:border-stone-800 transition-colors">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-xs font-mono tracking-widest uppercase text-emerald-400 block mb-2 font-bold">
+            <span className="text-xs font-mono tracking-widest uppercase text-emerald-800 dark:text-emerald-400 block mb-2 font-bold">
               Trusted Sadiqabad Property Network
             </span>
-            <h2 className="font-serif text-3xl sm:text-4xl text-stone-100 mb-3">
+            <h2 className="font-serif text-3xl sm:text-4xl text-stone-900 dark:text-stone-100 mb-3">
               Why Buy & Sell With Us in Sadiqabad
             </h2>
-            <p className="text-xs sm:text-sm text-stone-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed">
               We specialize strictly in Sadiqabad properties, providing complete registry verification, fair market pricing, and family inspection coordination.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-stone-950/70 p-6 rounded-xl border border-stone-800 space-y-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-900/40 text-emerald-400 flex items-center justify-center">
+            <div className="bg-white dark:bg-stone-950/70 p-6 rounded-xl border border-stone-200 dark:border-stone-800 space-y-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 flex items-center justify-center">
                 <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="font-sans font-bold text-sm text-white">Registry & Fard Verification</h3>
-              <p className="text-xs text-stone-400 leading-relaxed">
+              <h3 className="font-sans font-bold text-sm text-stone-900 dark:text-white">Registry & Fard Verification</h3>
+              <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
                 Legal ownership check and Arazi Record verification for all residential and commercial plots before deal closing.
               </p>
             </div>
 
-            <div className="bg-stone-950/70 p-6 rounded-xl border border-stone-800 space-y-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-900/40 text-emerald-400 flex items-center justify-center">
+            <div className="bg-white dark:bg-stone-950/70 p-6 rounded-xl border border-stone-200 dark:border-stone-800 space-y-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 flex items-center justify-center">
                 <Home className="w-5 h-5" />
               </div>
-              <h3 className="font-sans font-bold text-sm text-white">Direct Owner Negotiations</h3>
-              <p className="text-xs text-stone-400 leading-relaxed">
+              <h3 className="font-sans font-bold text-sm text-stone-900 dark:text-white">Direct Owner Negotiations</h3>
+              <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
                 Direct buyer-to-owner transparency without inflated intermediary markups, ensuring fair PKR rates.
               </p>
             </div>
 
-            <div className="bg-stone-950/70 p-6 rounded-xl border border-stone-800 space-y-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-900/40 text-emerald-400 flex items-center justify-center">
+            <div className="bg-white dark:bg-stone-950/70 p-6 rounded-xl border border-stone-200 dark:border-stone-800 space-y-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 flex items-center justify-center">
                 <Building className="w-5 h-5" />
               </div>
-              <h3 className="font-sans font-bold text-sm text-white">Commercial Frontage Expertise</h3>
-              <p className="text-xs text-stone-400 leading-relaxed">
+              <h3 className="font-sans font-bold text-sm text-stone-900 dark:text-white">Commercial Frontage Expertise</h3>
+              <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
                 Specialized in high-footfall commercial plots, shop rentals, and plazas along Main KLP Road and Railway Road.
               </p>
             </div>
 
-            <div className="bg-stone-950/70 p-6 rounded-xl border border-stone-800 space-y-3">
-              <div className="w-10 h-10 rounded-full bg-emerald-900/40 text-emerald-400 flex items-center justify-center">
+            <div className="bg-white dark:bg-stone-950/70 p-6 rounded-xl border border-stone-200 dark:border-stone-800 space-y-3 shadow-2xs">
+              <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-400 flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
-              <h3 className="font-sans font-bold text-sm text-white">Utilities & Sweet Water</h3>
-              <p className="text-xs text-stone-400 leading-relaxed">
+              <h3 className="font-sans font-bold text-sm text-stone-900 dark:text-white">Utilities & Sweet Water</h3>
+              <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed">
                 Detailed confirmation of Sui Gas connection status, 3-phase electricity, and sweet water bore quality.
               </p>
             </div>
