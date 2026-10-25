@@ -126,17 +126,17 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
               </div>
               <h4 className="font-serif text-2xl text-stone-900">Enquiry Received</h4>
               <p className="text-xs text-stone-600 leading-relaxed max-w-sm mx-auto">
-                Thank you, {fullName}. Our senior partner concierge has received your request regarding{' '}
-                <strong className="text-stone-900">{property ? property.title : 'Aura Estates'}</strong> and will respond
-                privately within 24 hours.
+                Thank you, {fullName}. Our Sadiqabad property agent has received your request regarding{' '}
+                <strong className="text-stone-900">{property ? property.title : 'Sadiqabad Real Estate'}</strong> and will contact
+                you shortly.
               </p>
               <div className="pt-4">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="bg-stone-900 hover:bg-stone-800 text-stone-100 text-xs font-bold px-6 py-2.5 rounded-full shadow transition-all cursor-pointer"
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-6 py-2.5 rounded-full shadow transition-all cursor-pointer"
                 >
-                  Return to Portfolio
+                  Return to Listings
                 </button>
               </div>
             </div>
@@ -151,14 +151,14 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
               {/* Inquiry Type Chips */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-2">
-                  Nature of Request
+                  Purpose of Contact
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 text-xs">
                   {[
-                    { id: 'viewing', label: 'Private Viewing' },
-                    { id: 'dossier', label: 'Architectural Dossier' },
-                    { id: 'advisory', label: 'Acquisition Advice' },
-                    { id: 'financing', label: 'Private Financing' },
+                    { id: 'viewing', label: 'On-Site Inspection' },
+                    { id: 'dossier', label: 'Registry / Fard Check' },
+                    { id: 'advisory', label: 'Price & Offer' },
+                    { id: 'financing', label: 'Bank Financing' },
                     { id: 'general', label: 'General Inquiry' },
                   ].map(t => (
                     <button

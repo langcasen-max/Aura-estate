@@ -18,161 +18,160 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
               type="button"
               onClick={() => onNavigate('/')}
               className="text-left cursor-pointer focus:outline-none"
-              aria-label="Aura Estates Home"
+              aria-label="Sadiqabad Estates Home"
             >
               <Logo variant="horizontal" size="md" theme="dark" showTagline={true} />
             </button>
             <p className="text-xs text-stone-400 leading-relaxed max-w-sm">
-              An editorial showcase of world-class private residences, architecturally significant estates, and
-              curated penthouses for discerning global collectors.
+              Sadiqabad’s trusted real estate marketplace. Verified houses, residential plots, and commercial properties across Model Town, Allama Iqbal Town, Mazhar Fareed Colony, Satellite Town, and KLP Road.
             </p>
-            <div className="pt-2 flex items-center gap-2 text-[11px] text-amber-400/90 font-mono">
-              <ShieldCheck className="w-4 h-4 text-amber-400" />
-              <span>Licensed Luxury Real Estate Brokerage</span>
+            <div className="pt-2 flex items-center gap-2 text-[11px] text-emerald-400 font-mono">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>Verified Sadiqabad Property Network</span>
             </div>
           </div>
 
-          {/* Col 2: Portfolio Links (working filtered links) */}
+          {/* Col 2: Portfolio Links */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold tracking-widest uppercase text-stone-100">
-              Portfolio
+              Sadiqabad Properties
             </h4>
             <ul className="space-y-2 text-xs text-stone-400">
               <li>
                 <button
                   type="button"
                   onClick={() => onNavigate('/properties')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  All Residences
+                  All Properties in Sadiqabad
                 </button>
               </li>
               <li>
                 <button
                   type="button"
                   onClick={() => onNavigate('/properties?listing_status=for_sale')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Acquisitions (For Sale)
+                  Houses For Sale (Buy)
                 </button>
               </li>
               <li>
                 <button
                   type="button"
                   onClick={() => onNavigate('/properties?listing_status=for_rent')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Private Leases (For Rent)
+                  Family Residences (For Rent)
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('/properties?type=penthouse')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  onClick={() => onNavigate('/properties?locality=Model%20Town')}
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Penthouses & Sky Residences
+                  Model Town Sadiqabad
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('/properties?type=villa')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  onClick={() => onNavigate('/properties?locality=Allama%20Iqbal%20Town')}
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Waterfront & Ocean Villas
+                  Allama Iqbal Town
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('/properties?type=estate')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  onClick={() => onNavigate('/properties?type=commercial')}
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Historic & Alpine Estates
+                  Commercial Plazas & Shops
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: Agency & Services */}
+          {/* Col 3: Local Services */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold tracking-widest uppercase text-stone-100">
-              Advisory
+              Local Assistance
             </h4>
             <ul className="space-y-2 text-xs text-stone-400">
               <li>
                 <button
                   type="button"
                   onClick={() => onNavigate('/about')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  The Agency & Ethos
+                  About Our Sadiqabad Office
                 </button>
               </li>
               <li>
                 <button
                   type="button"
                   onClick={() => onNavigate('/contact')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Private Viewing Requests
+                  Schedule On-Site Inspection
                 </button>
               </li>
               <li>
                 <button
                   type="button"
                   onClick={() => onNavigate('/contact')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Architectural Dossiers
+                  Arazi Record & Registry Verification
                 </button>
               </li>
               <li>
                 <button
                   type="button"
                   onClick={() => onNavigate('/contact')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Acquisition Financing
+                  Direct Owner Deal Structuring
                 </button>
               </li>
               <li>
                 <button
                   type="button"
-                  onClick={() => onNavigate('/dashboard')}
-                  className="hover:text-amber-200 transition-colors cursor-pointer"
+                  onClick={() => onNavigate('/login?next=/admin')}
+                  className="hover:text-emerald-300 transition-colors cursor-pointer"
                 >
-                  Client Portal
+                  Admin Portal Login
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Col 4: Contact & Concierge */}
+          {/* Col 4: Contact & Office */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold tracking-widest uppercase text-stone-100">
-              Concierge Office
+              Sadiqabad Office
             </h4>
             <div className="space-y-2.5 text-xs text-stone-400">
               <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                 <span>{siteConfig.address}</span>
               </div>
               <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-stone-400 flex-shrink-0" />
+                <Phone className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                 <a href={`tel:${siteConfig.phone}`} className="hover:text-stone-200">
                   {siteConfig.phone}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-stone-400 flex-shrink-0" />
+                <Mail className="w-4 h-4 text-emerald-500 flex-shrink-0" />
                 <a href={`mailto:${siteConfig.email}`} className="hover:text-stone-200">
                   {siteConfig.email}
                 </a>
               </div>
               <div className="flex items-start gap-2.5">
-                <Clock className="w-4 h-4 text-stone-400 flex-shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-emerald-500 flex-shrink-0 mt-0.5" />
                 <span>{siteConfig.hours}</span>
               </div>
             </div>
@@ -181,16 +180,16 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-stone-800/80 flex flex-col sm:flex-row items-center justify-between text-[11px] text-stone-400 gap-4">
-          <p>© {new Date().getFullYear()} {siteConfig.agency_name}. All rights reserved. Equal Housing Opportunity.</p>
+          <p>© {new Date().getFullYear()} {siteConfig.agency_name}. Exclusively Sadiqabad City, District Rahim Yar Khan, Punjab.</p>
           <div className="flex items-center gap-6">
             <button type="button" onClick={() => onNavigate('/about')} className="hover:text-stone-300 cursor-pointer">
               Privacy Policy
             </button>
             <button type="button" onClick={() => onNavigate('/about')} className="hover:text-stone-300 cursor-pointer">
-              Terms of Advisory
+              Terms of Service
             </button>
             <button type="button" onClick={() => onNavigate('/contact')} className="hover:text-stone-300 cursor-pointer">
-              Fair Housing Pledge
+              Contact Us
             </button>
           </div>
         </div>

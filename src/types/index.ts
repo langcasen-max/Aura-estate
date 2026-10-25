@@ -21,6 +21,7 @@ export type InquiryType =
 
 export interface PropertyLocation {
   address: string;
+  locality?: string;
   city: string;
   state: string;
   postal_code: string;
@@ -39,6 +40,17 @@ export interface PropertyMedia {
   created_at?: string;
 }
 
+export interface PropertyFeatures {
+  structure_type?: string;
+  registry_status?: string;
+  car_porch?: string;
+  water_source?: string;
+  gas_status?: string;
+  electricity?: string;
+  flooring?: string;
+  street_width?: string;
+}
+
 export interface Property {
   id: string;
   title: string;
@@ -51,12 +63,14 @@ export interface Property {
   bedrooms: number;
   bathrooms: number;
   area_sqft: number;
+  area_marla?: number;
   year_built?: number;
   is_featured: boolean;
   featured_image: string;
   location: PropertyLocation;
   amenities: string[];
   media?: PropertyMedia[];
+  features?: PropertyFeatures;
   created_by?: string;
   created_at: string;
   updated_at: string;
@@ -100,6 +114,7 @@ export interface PropertyFilters {
   bathrooms?: number | 'all';
   min_area?: number;
   city?: string | 'all';
+  locality?: string | 'all';
   amenities?: string[];
   search?: string;
   sort_by?: 'newest' | 'oldest' | 'price_asc' | 'price_desc' | 'area_desc' | 'beds_desc';

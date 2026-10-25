@@ -3,7 +3,7 @@ import { supabase, isSupabaseConfigured, isUuid } from '../lib/supabase';
 import { INITIAL_PROPERTIES } from './mockData';
 import { generateSafeSlug, escapeFilterValue } from '../lib/security';
 
-const STORAGE_KEY = 'aura_estates_properties_v1';
+const STORAGE_KEY = 'sadiqabad_properties_v4';
 
 function getLocalProperties(): Property[] {
   try {
@@ -34,6 +34,15 @@ function filterAndSortProperties(rawList: Property[], filters: PropertyFilters =
   }
   if (filters.property_type && filters.property_type !== 'all') {
     list = list.filter(p => p.property_type === filters.property_type);
+  }
+  if (filters.locality && filters.locality !== 'all') {
+    const loc = filters.locality.toLowerCase();
+    list = list.filter(
+      p =>
+        p.location.locality?.toLowerCase() === loc ||
+        p.location.address.toLowerCase().includes(loc) ||
+        p.title.toLowerCase().includes(loc)
+    );
   }
   if (filters.city && filters.city !== 'all') {
     list = list.filter(p => p.location.city.toLowerCase() === filters.city?.toLowerCase());
@@ -203,21 +212,23 @@ export async function createProperty(data: Partial<Property>): Promise<Property>
     slug,
     description: data.description || '',
     price: data.price || 0,
-    currency: data.currency || 'USD',
-    property_type: data.property_type || 'estate',
+    currency: data.currency || 'PKR',
+    property_type: data.property_type || 'villa',
     listing_status: data.listing_status || 'for_sale',
     bedrooms: data.bedrooms || 0,
     bathrooms: data.bathrooms || 0,
     area_sqft: data.area_sqft || 0,
+    area_marla: data.area_marla || (data.area_sqft ? Math.round((data.area_sqft / 225) * 10) / 10 : 0),
     year_built: data.year_built || new Date().getFullYear(),
     is_featured: Boolean(data.is_featured),
     featured_image: data.featured_image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
     location: data.location || {
       address: '',
-      city: '',
-      state: '',
-      postal_code: '',
-      country: 'United States',
+      locality: 'Model Town',
+      city: 'Sadiqabad',
+      state: 'Punjab',
+      postal_code: '64350',
+      country: 'Pakistan',
     },
     amenities: data.amenities || [],
     media: data.media || [

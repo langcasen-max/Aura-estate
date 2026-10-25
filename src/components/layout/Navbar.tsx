@@ -82,7 +82,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
             </button>
             <button
               type="button"
-              onClick={() => setDemoRole('admin')}
+              onClick={() => {
+                if (isAdmin) {
+                  handleNavClick('/admin');
+                } else {
+                  handleNavClick('/login?next=' + encodeURIComponent('/admin'));
+                }
+              }}
               className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors cursor-pointer ${
                 role === 'admin'
                   ? 'bg-amber-600 text-white font-bold'

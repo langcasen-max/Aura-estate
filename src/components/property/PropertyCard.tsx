@@ -1,5 +1,6 @@
 import React from 'react';
 import { Property } from '../../types';
+import { formatPKR, formatArea } from '../../lib/formatters';
 import { Bed, Bath, Maximize2, MapPin, Heart } from 'lucide-react';
 
 interface PropertyCardProps {
@@ -15,19 +16,27 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
   onToggleFavorite,
   onSelectProperty,
 }) => {
-  const formattedPrice =
-    property.listing_status === 'for_rent'
-      ? `$${property.price.toLocaleString()} / mo`
-      : `$${property.price.toLocaleString()}`;
+  const formattedPrice = formatPKR(property.price, property.listing_status === 'for_rent');
 
   const statusLabel =
     property.listing_status === 'for_sale'
-      ? 'For Acquisition'
+      ? 'For Sale'
       : property.listing_status === 'for_rent'
-      ? 'Private Lease'
+      ? 'For Rent'
       : property.listing_status === 'sold'
-      ? 'Acquired / Sold'
+      ? 'Sold'
       : 'Contract Pending';
+
+  const typeLabelMap: Record<string, string> = {
+    villa: 'Independent House / Villa',
+    townhouse: 'Townhouse / Double Story',
+    estate: 'Plot / Land',
+    apartment: 'Upper Portion / Flat',
+    commercial: 'Commercial Plaza / Shop',
+    penthouse: 'Luxury House',
+  };
+
+  const localityText = property.location.locality || property.location.address || 'Sadiqabad';
 
   return (
     <article
@@ -53,7 +62,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
               property.listing_status === 'for_sale'
                 ? 'bg-stone-900 text-stone-100'
                 : property.listing_status === 'for_rent'
-                ? 'bg-amber-900 text-amber-100'
+                ? 'bg-emerald-800 text-emerald-100'
                 : 'bg-stone-600 text-white'
             }`}
           >
@@ -73,8 +82,8 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
         {/* Bottom Property Type Pill */}
         <div className="absolute bottom-3 left-3 pointer-events-none">
-          <span className="text-[10px] font-medium tracking-wider uppercase bg-stone-950/70 text-stone-200 px-2 py-0.5 rounded backdrop-blur-xs">
-            {property.property_type}
+          <span className="text-[10px] font-medium tracking-wider uppercase bg-stone-950/80 text-stone-200 px-2 py-0.5 rounded backdrop-blur-xs">
+            {typeLabelMap[property.property_type] || property.property_type}
           </span>
         </div>
       </div>
@@ -83,7 +92,7 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
       <div className="p-5 flex-1 flex flex-col justify-between">
         <div>
           {/* Price */}
-          <div className="font-serif text-2xl font-normal text-stone-900 tracking-tight mb-1">
+          <div className="font-serif text-2xl font-bold text-stone-900 tracking-tight mb-1">
             {formattedPrice}
           </div>
 
@@ -94,28 +103,38 @@ export const PropertyCard: React.FC<PropertyCardProps> = ({
 
           {/* Location */}
           <div className="flex items-center gap-1.5 text-xs text-stone-500 mb-4">
-            <MapPin className="w-3.5 h-3.5 text-stone-400 flex-shrink-0" />
+            <MapPin className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
             <span className="truncate">
-              {property.location.city}, {property.location.state}
+              {localityText}, Sadiqabad
             </span>
           </div>
         </div>
 
-        {/* Key Facts Row: Beds / Baths / Sq Ft */}
+        {/* Key Facts Row: Beds / Baths / Marla & Sq Ft */}
         <div className="pt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-600 font-medium">
-          <div className="flex items-center gap-1.5" title={`${property.bedrooms} Bedrooms`}>
-            <Bed className="w-4 h-4 text-stone-400" />
-            <span>{property.bedrooms} Beds</span>
-          </div>
-          <span className="text-stone-300">•</span>
-          <div className="flex items-center gap-1.5" title={`${property.bathrooms} Bathrooms`}>
-            <Bath className="w-4 h-4 text-stone-400" />
-            <span>{property.bathrooms} Baths</span>
-          </div>
-          <span className="text-stone-300">•</span>
-          <div className="flex items-center gap-1.5" title={`${property.area_sqft} Square Feet`}>
+          {property.bedrooms > 0 ? (
+            <>
+              <div className="flex items-center gap-1.5" title={`${property.bedrooms} Bedrooms`}>
+                <Bed className="w-4 h-4 text-stone-400" />
+                <span>{property.bedrooms} Beds</span>
+              </div>
+              <span className="text-stone-300">•</span>
+              <div className="flex items-center gap-1.5" title={`${property.bathrooms} Bathrooms`}>
+                <Bath className="w-4 h-4 text-stone-400" />
+                <span>{property.bathrooms} Baths</span>
+              </div>
+              <span className="text-stone-300">•</span>
+            </>
+          ) : (
+            <>
+              <span className="text-[11px] font-semibold text-stone-500">Commercial / Plot</span>
+              <span className="text-stone-300">•</span>
+            </>
+          )}
+
+          <div className="flex items-center gap-1.5 font-semibold text-stone-700" title="Plot & Covered Area">
             <Maximize2 className="w-4 h-4 text-stone-400" />
-            <span>{property.area_sqft.toLocaleString()} sq ft</span>
+            <span>{formatArea(property.area_sqft, property.area_marla)}</span>
           </div>
         </div>
       </div>

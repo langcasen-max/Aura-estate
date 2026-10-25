@@ -3,37 +3,35 @@
  */
 
 /**
- * Designated administrative email addresses authorized for the Admin Operations Console.
- * Explicitly includes bearbates512@gmail.com as requested by the user.
+ * Designated administrative email address authorized for the Admin Operations Console.
+ * Strictly limited to langcasen@gmail.com with password office@12 as instructed.
  */
+export const PRIMARY_ADMIN_EMAIL = 'langcasen@gmail.com';
+export const PRIMARY_ADMIN_PASSWORD = 'office@12';
+
 export const DESIGNATED_ADMIN_EMAILS: readonly string[] = [
-  'bearbates512@gmail.com',
-  'admin@auraestates.luxury',
-  'admin@auraestates.com',
+  PRIMARY_ADMIN_EMAIL,
 ];
 
 /**
- * Checks whether an email address belongs to a designated administrator (case-insensitive)
+ * Checks whether an email address belongs to the designated administrator (case-insensitive)
  */
 export function isDesignatedAdminEmail(email?: string | null): boolean {
   if (!email) return false;
-  const clean = email.trim().toLowerCase();
-  return DESIGNATED_ADMIN_EMAILS.some(adminEmail => adminEmail.toLowerCase() === clean);
+  return email.trim().toLowerCase() === PRIMARY_ADMIN_EMAIL.toLowerCase();
 }
 
 /**
- * Resolves user role based on email, database profile role, and Supabase metadata.
- * Designated admin emails (like bearbates512@gmail.com) are guaranteed 'admin' role.
+ * Resolves user role based on email.
+ * Strictly enforces that ONLY langcasen@gmail.com can hold the 'admin' role.
+ * All other accounts are strictly 'user' role and cannot access the admin panel.
  */
 export function resolveUserRole(
   email?: string | null,
-  profileRole?: string | null,
-  metadataRole?: string | null
+  _profileRole?: string | null,
+  _metadataRole?: string | null
 ): 'admin' | 'user' {
   if (isDesignatedAdminEmail(email)) {
-    return 'admin';
-  }
-  if (profileRole === 'admin' || metadataRole === 'admin') {
     return 'admin';
   }
   return 'user';

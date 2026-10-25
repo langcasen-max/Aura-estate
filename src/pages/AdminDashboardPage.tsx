@@ -37,6 +37,7 @@ import {
 import { getAnalyticsSummary, AnalyticsSummary } from '../services/analyticsService';
 import { getSiteSettings, updateSiteSettings, resetDefaultSettings } from '../services/settingsService';
 import { generateSafeSlug } from '../lib/security';
+import { processImageFile, isValidImageSource } from '../lib/imageUpload';
 import {
   LayoutDashboard,
   Building2,
@@ -69,40 +70,34 @@ import {
   MapPin,
   Clock,
   UserPlus,
+  Upload,
+  Camera,
+  Loader2,
 } from 'lucide-react';
+import {
+  SADIQABAD_LOCALITIES,
+  SADIQABAD_AMENITIES,
+  formatPKR,
+  formatArea,
+  sqftToMarla,
+  marlaToSqft,
+} from '../lib/formatters';
 
 type AdminTab = 'overview' | 'properties' | 'inquiries' | 'users' | 'analytics' | 'settings';
 
-const LUXURY_AMENITY_OPTIONS = [
-  'Infinity Pool',
-  'Wine Cellar',
-  'Private Spa',
-  'Home Cinema',
-  'Private Yacht Dock (180ft)',
-  'Ski-in / Ski-out Access',
-  'Panoramic City Views',
-  '24hr White-Glove Concierge',
-  'Helipad',
-  'Smart Home Automation',
-  'Tennis Court',
-  'Cold Plunge & Finnish Sauna',
-  'Security Pavilion',
-  'Motor Court',
-  'Private Beach Access',
-  'Radiant Heated Hardwood',
-];
+const LUXURY_AMENITY_OPTIONS = SADIQABAD_AMENITIES;
 
 const PRESET_IMAGE_GALLERY = [
-  { label: 'Bel-Air Modern Sunset Estate', url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Glass Pavilion Living Hall', url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Architectural Marble Dining', url: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Tribeca Sky Terrace & Jacuzzi', url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Biscayne Bay Mediterranean Villa', url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Aspen Alpine Timber Retreat', url: 'https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Malibu Oceanfront Saline Pool', url: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Mayfair Parquet Drawing Salon', url: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Pacific Heights Penthouse Lounge', url: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80' },
-  { label: 'Faena Turquoise Ocean Balcony', url: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Model Town 10 Marla Luxury Double-Story House', url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Allama Iqbal Town 5 Marla Modern Elevation', url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Spanish Style Corner Villa Frontage', url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Satellite Town Double Story House', url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Main KLP Road Commercial Plaza Front', url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Railway Road Commercial Building Front', url: 'https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Designer Drawing Room & Marble Flooring', url: 'https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Executive Kitchen with Ash Wood Cabinets', url: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Spacious Master Bedroom Interior', url: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1600&q=80' },
+  { label: '5 Marla Budget Single Story Home', url: 'https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=1600&q=80' },
 ];
 
 export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
@@ -422,6 +417,16 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
 
           <button
             type="button"
+            onClick={() => setResetConfirmAction('clear_all_properties')}
+            className="bg-red-950/60 hover:bg-red-900/80 text-red-200 border border-red-700/60 font-semibold text-xs px-4 py-2.5 rounded-full shadow-md flex items-center gap-1.5 cursor-pointer transition-colors"
+            title="Purge all demo properties to start fresh with real listings"
+          >
+            <Trash2 className="w-3.5 h-3.5 text-red-400" />
+            <span>Purge Demo Data</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => {
               setEditingProperty(null);
               setPropertyModalOpen(true);
@@ -547,10 +552,10 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
                 <span>Portfolio Valuation</span>
                 <TrendingUp className="w-4 h-4 text-stone-300" />
               </span>
-              <div className="font-serif text-3xl font-bold text-stone-900">
-                ${(analytics.estimatedPortfolioValue / 1000000).toFixed(1)}M
+              <div className="font-serif text-2xl font-bold text-stone-900">
+                {formatPKR(analytics.estimatedPortfolioValue)}
               </div>
-              <p className="text-[11px] text-stone-500">Aggregate portfolio listing value</p>
+              <p className="text-[11px] text-stone-500">Aggregate Sadiqabad listings value</p>
             </div>
 
             <div className="bg-white p-6 rounded-2xl border border-stone-200/90 shadow-xs space-y-2">
@@ -558,11 +563,11 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
                 <span>Agency Commission</span>
                 <DollarSign className="w-4 h-4 text-emerald-600" />
               </span>
-              <div className="font-serif text-3xl font-bold text-emerald-800">
-                ${(analytics.estimatedCommission / 1000).toLocaleString(undefined, { maximumFractionDigits: 0 })}k
+              <div className="font-serif text-2xl font-bold text-emerald-800">
+                {formatPKR(analytics.estimatedCommission)}
               </div>
               <p className="text-[11px] text-stone-500">
-                Projected at {(siteSettings.commission_rate * 100).toFixed(1)}% fee schedule
+                Projected at {(siteSettings.commission_rate * 100).toFixed(1)}% local agency fee
               </p>
             </div>
           </div>
@@ -763,13 +768,25 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
                   <span>Featured Only</span>
                 </button>
 
+                {properties.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setResetConfirmAction('clear_all_properties')}
+                    className="h-10 px-3.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+                    title="Purge all demo listings so you can add real properties"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-600" />
+                    <span>Purge Demo Data</span>
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={() => {
                     setEditingProperty(null);
                     setPropertyModalOpen(true);
                   }}
-                  className="h-10 px-4 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                  className="h-10 px-4 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add Residence</span>
@@ -814,18 +831,56 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
                 <tbody className="divide-y divide-stone-100">
                   {filteredProperties.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="py-12 text-center text-stone-500">
-                        No residences found matching your criteria.{' '}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingProperty(null);
-                            setPropertyModalOpen(true);
-                          }}
-                          className="text-amber-800 font-bold hover:underline ml-1"
-                        >
-                          Add a new residence now
-                        </button>
+                      <td colSpan={7} className="py-16 text-center">
+                        <div className="max-w-md mx-auto space-y-3">
+                          <Building2 className="w-12 h-12 text-stone-300 mx-auto" />
+                          <h4 className="font-serif text-xl text-stone-800 font-semibold">
+                            {properties.length === 0 ? 'All Demo Listings Purged' : 'No Matching Residences'}
+                          </h4>
+                          <p className="text-xs text-stone-500 leading-relaxed">
+                            {properties.length === 0
+                              ? 'The catalogue is completely fresh and ready for your real luxury properties. Click below to publish your first real residence with photos directly from your device.'
+                              : 'No residences matched your search keywords or filter criteria.'}
+                          </p>
+                          <div className="flex items-center justify-center gap-3 pt-2">
+                            {properties.length === 0 ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingProperty(null);
+                                    setPropertyModalOpen(true);
+                                  }}
+                                  className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold rounded-xl text-xs flex items-center gap-2 cursor-pointer shadow-md transition-all hover:scale-[1.02]"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  <span>+ Add Your First Real Residence</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => setResetConfirmAction('restore_demo_properties')}
+                                  className="px-3.5 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <RotateCcw className="w-3.5 h-3.5" />
+                                  <span>Restore Demo Data</span>
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setPropertySearch('');
+                                  setPropertyStatusFilter('all');
+                                  setPropertyTypeFilter('all');
+                                  setPropertyFeaturedOnly(false);
+                                }}
+                                className="text-amber-800 font-bold text-xs hover:underline cursor-pointer"
+                              >
+                                Clear search filters
+                              </button>
+                            )}
+                          </div>
+                        </div>
                       </td>
                     </tr>
                   ) : (
@@ -848,19 +903,17 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
                         </td>
 
                         <td className="py-3.5 px-4 text-stone-700">
-                          <span className="font-semibold block">{p.location.city}</span>
-                          <span className="text-[10px] text-stone-400">{p.location.address || 'Confidential Enclave'}</span>
+                          <span className="font-semibold block">{p.location.locality || p.location.address || 'Sadiqabad'}</span>
+                          <span className="text-[10px] text-stone-400">{p.location.address || 'Sadiqabad, Punjab'}</span>
                         </td>
 
                         <td className="py-3.5 px-4 font-serif font-bold text-stone-900 text-sm">
-                          {p.listing_status === 'for_rent'
-                            ? `$${p.price.toLocaleString()} / mo`
-                            : `$${p.price.toLocaleString()}`}
+                          {formatPKR(p.price, p.listing_status === 'for_rent')}
                         </td>
 
                         <td className="py-3.5 px-4 text-stone-600">
-                          <span>{p.bedrooms} beds • {p.bathrooms} baths</span>
-                          <span className="block text-[10px] text-stone-400">{p.area_sqft.toLocaleString()} sq ft</span>
+                          <span>{p.bedrooms > 0 ? `${p.bedrooms} beds • ${p.bathrooms} baths` : 'Commercial Unit'}</span>
+                          <span className="block text-[10px] text-emerald-700 font-bold">{formatArea(p.area_sqft, p.area_marla)}</span>
                         </td>
 
                         <td className="py-3.5 px-4">
@@ -1707,9 +1760,19 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
       {resetConfirmAction && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-xs animate-fadeIn">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="font-serif text-2xl text-stone-900">Confirm Reset Operation</h3>
+            <h3 className="font-serif text-2xl text-stone-900">
+              {resetConfirmAction === 'clear_all_properties'
+                ? 'Purge All Demo Listings?'
+                : resetConfirmAction === 'restore_demo_properties'
+                ? 'Restore Demo Properties?'
+                : 'Confirm Reset Operation'}
+            </h3>
             <p className="text-xs text-stone-600 leading-relaxed">
-              Are you sure you want to execute this reset operation? Current local changes for this dataset will be updated.
+              {resetConfirmAction === 'clear_all_properties'
+                ? 'This will completely remove all 7 demo properties from the website so you can publish your own genuine listings with photos and real details from your device. Are you sure you want to proceed?'
+                : resetConfirmAction === 'restore_demo_properties'
+                ? 'This will reload the 7 default showcase luxury residences into your catalogue.'
+                : 'Are you sure you want to execute this reset operation? Current local changes for this dataset will be updated.'}
             </p>
             <div className="pt-2 flex items-center justify-end gap-2">
               <button
@@ -1722,9 +1785,13 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
               <button
                 type="button"
                 onClick={() => handleExecuteReset(resetConfirmAction)}
-                className="px-4 py-2 bg-stone-900 text-white font-bold text-xs rounded-lg hover:bg-stone-800 cursor-pointer"
+                className={`px-4 py-2 font-bold text-xs rounded-lg cursor-pointer ${
+                  resetConfirmAction === 'clear_all_properties'
+                    ? 'bg-red-600 hover:bg-red-700 text-white shadow-md'
+                    : 'bg-stone-900 hover:bg-stone-800 text-white'
+                }`}
               >
-                Proceed with Reset
+                {resetConfirmAction === 'clear_all_properties' ? 'Purge All Demo Listings' : 'Proceed with Reset'}
               </button>
             </div>
           </div>
@@ -1750,44 +1817,92 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
   const [title, setTitle] = useState(property?.title || '');
   const [slug, setSlug] = useState(property?.slug || '');
   const [description, setDescription] = useState(property?.description || '');
-  const [price, setPrice] = useState(property?.price || 18500000);
-  const [currency, setCurrency] = useState(property?.currency || 'USD');
-  const [propertyType, setPropertyType] = useState<PropertyType>(property?.property_type || 'estate');
+  const [price, setPrice] = useState(property?.price || 4800000);
+  const [currency, setCurrency] = useState('PKR');
+  const [propertyType, setPropertyType] = useState<PropertyType>(property?.property_type || 'villa');
   const [listingStatus, setListingStatus] = useState<ListingStatus>(property?.listing_status || 'for_sale');
   const [isFeatured, setIsFeatured] = useState(property?.is_featured || false);
 
   // Specs
-  const [bedrooms, setBedrooms] = useState(property?.bedrooms || 5);
-  const [bathrooms, setBathrooms] = useState(property?.bathrooms || 6);
-  const [areaSqft, setAreaSqft] = useState(property?.area_sqft || 8500);
-  const [yearBuilt, setYearBuilt] = useState(property?.year_built || 2024);
+  const [bedrooms, setBedrooms] = useState(property?.bedrooms !== undefined ? property.bedrooms : 3);
+  const [bathrooms, setBathrooms] = useState(property?.bathrooms !== undefined ? property.bathrooms : 3);
+  const [areaSqft, setAreaSqft] = useState(property?.area_sqft || 1125);
+  const [areaMarla, setAreaMarla] = useState(property?.area_marla || (property?.area_sqft ? sqftToMarla(property.area_sqft) : 5));
+  const [yearBuilt, setYearBuilt] = useState(property?.year_built || 2025);
+
+  // House Specific Construction Features (گھر کی تفصیلی معلومات)
+  const [structureType, setStructureType] = useState(property?.features?.structure_type || 'Single Story (RCC Lenter & Awwal Eent)');
+  const [registryStatus, setRegistryStatus] = useState(property?.features?.registry_status || '100% Registry & Intiqal Clear (رجسٹری انتقال پاس)');
+  const [carPorch, setCarPorch] = useState(property?.features?.car_porch || 'Car Porch for 1 Car & Bikes');
+  const [waterSource, setWaterSource] = useState(property?.features?.water_source || 'Sweet Water Bore with 1HP Motor');
+  const [gasStatus, setGasStatus] = useState(property?.features?.gas_status || 'Sui Gas Supply Available');
+  const [electricity, setElectricity] = useState(property?.features?.electricity || 'WAPDA Meter Installed');
+  const [flooring, setFlooring] = useState(property?.features?.flooring || 'Full Marble & Bath Tiles');
+  const [streetWidth, setStreetWidth] = useState(property?.features?.street_width || '30ft Wide Paved Street');
 
   // Location
-  const [address, setAddress] = useState(property?.location.address || '');
-  const [city, setCity] = useState(property?.location.city || 'Bel-Air');
-  const [state, setState] = useState(property?.location.state || 'CA');
-  const [postalCode, setPostalCode] = useState(property?.location.postal_code || '90210');
-  const [country, setCountry] = useState(property?.location.country || 'United States');
-  const [latitude, setLatitude] = useState(property?.location.latitude || 34.0837);
-  const [longitude, setLongitude] = useState(property?.location.longitude || -118.4487);
+  const [address, setAddress] = useState(property?.location.address || 'Street 5, Sector B');
+  const [locality, setLocality] = useState(property?.location.locality || 'Satellite Town');
+  const [city, setCity] = useState('Sadiqabad');
+  const [state, setState] = useState(property?.location.state || 'Punjab');
+  const [postalCode, setPostalCode] = useState(property?.location.postal_code || '64350');
+  const [country, setCountry] = useState('Pakistan');
+  const [latitude, setLatitude] = useState(property?.location.latitude || 28.3089);
+  const [longitude, setLongitude] = useState(property?.location.longitude || 70.1311);
 
   // Media
   const [featuredImage, setFeaturedImage] = useState(
-    property?.featured_image || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80'
+    property?.featured_image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80'
   );
   const [galleryUrls, setGalleryUrls] = useState<string[]>(() => {
     if (property?.media && property.media.length > 0) {
       return property.media.map(m => m.url);
     }
     return [
-      property?.featured_image || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80',
+      property?.featured_image || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
     ];
   });
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    setIsUploadingPhoto(true);
+    setError(null);
+    try {
+      const processedUrls: string[] = [];
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.type.startsWith('image/')) {
+          const dataUrl = await processImageFile(file);
+          processedUrls.push(dataUrl);
+        }
+      }
+      if (processedUrls.length > 0) {
+        setGalleryUrls(prev => {
+          const combined = [...processedUrls, ...prev.filter(u => !processedUrls.includes(u))];
+          return combined;
+        });
+        setFeaturedImage(processedUrls[0]);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to process image file from device');
+    } finally {
+      setIsUploadingPhoto(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
 
   // Amenities
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>(
-    property?.amenities || ['Infinity Pool', 'Wine Cellar', 'Private Spa', 'Home Cinema']
+    property?.amenities || [
+      'Sweet Water Bore / Supply',
+      'Dedicated Car Porch / Garage',
+      'Sui Gas Available',
+      'Near Jamia Masjid & Park',
+    ]
   );
   const [customAmenityInput, setCustomAmenityInput] = useState('');
 
@@ -1860,23 +1975,35 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
       slug: safeSlug,
       description,
       price: Number(price),
-      currency,
+      currency: 'PKR',
       property_type: propertyType,
       listing_status: listingStatus,
       bedrooms: Number(bedrooms),
       bathrooms: Number(bathrooms),
       area_sqft: Number(areaSqft),
+      area_marla: Number(areaMarla) || sqftToMarla(Number(areaSqft)),
       year_built: Number(yearBuilt),
       is_featured: isFeatured,
-      featured_image: featuredImage || galleryUrls[0] || 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80',
+      featured_image: featuredImage || galleryUrls[0] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80',
       location: {
-        address: address || 'Confidential Address',
-        city,
-        state,
-        postal_code: postalCode,
-        country,
-        latitude: Number(latitude),
-        longitude: Number(longitude),
+        address: address || 'Main Road',
+        locality: locality || 'Satellite Town',
+        city: 'Sadiqabad',
+        state: state || 'Punjab',
+        postal_code: postalCode || '64350',
+        country: 'Pakistan',
+        latitude: Number(latitude) || 28.3089,
+        longitude: Number(longitude) || 70.1311,
+      },
+      features: {
+        structure_type: structureType,
+        registry_status: registryStatus,
+        car_porch: carPorch,
+        water_source: waterSource,
+        gas_status: gasStatus,
+        electricity: electricity,
+        flooring: flooring,
+        street_width: streetWidth,
       },
       amenities: selectedAmenities,
       media: mediaList,
@@ -1975,11 +2102,11 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
           {modalTab === 'basics' && (
             <div className="space-y-4 animate-fadeIn">
               <div>
-                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Residence Title *</label>
+                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Property Title *</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. The Bel-Air Promontory Estate"
+                  placeholder="e.g. 5 Marla Brand New Double Story House - Model Town, Sadiqabad"
                   value={title}
                   onChange={e => handleTitleChange(e.target.value)}
                   className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 text-sm font-semibold focus:outline-none"
@@ -2000,7 +2127,7 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                 </div>
 
                 <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Price (USD) *</label>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Price in PKR (Pakistani Rupees) *</label>
                   <input
                     type="number"
                     required
@@ -2008,48 +2135,48 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                     onChange={e => setPrice(Number(e.target.value))}
                     className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-serif font-bold text-sm"
                   />
-                  <span className="text-[10px] text-stone-400 mt-1 block">
-                    Formatted: ${Number(price).toLocaleString()}
+                  <span className="text-[11px] text-emerald-800 font-bold mt-1 block">
+                    Formatted: {formatPKR(Number(price), listingStatus === 'for_rent')}
                   </span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Residence Type</label>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Property Type</label>
                   <select
                     value={propertyType}
                     onChange={e => setPropertyType(e.target.value as PropertyType)}
                     className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
                   >
-                    <option value="villa">Waterfront & Ocean Villa</option>
-                    <option value="penthouse">Sky Penthouse</option>
-                    <option value="estate">Country & Alpine Estate</option>
-                    <option value="apartment">Luxury Apartment</option>
-                    <option value="townhouse">Historic Townhouse</option>
+                    <option value="villa">Independent House / Villa</option>
+                    <option value="townhouse">Townhouse / Double Story</option>
+                    <option value="estate">Residential Plot / Land</option>
+                    <option value="apartment">Upper Portion / Flat</option>
+                    <option value="commercial">Commercial Plaza / Shop</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Listing Status</label>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Listing Purpose</label>
                   <select
                     value={listingStatus}
                     onChange={e => setListingStatus(e.target.value as ListingStatus)}
                     className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
                   >
-                    <option value="for_sale">For Acquisition (For Sale)</option>
-                    <option value="for_rent">Private Lease (For Rent)</option>
-                    <option value="sold">Sold / Acquired</option>
-                    <option value="pending">Pending Contract</option>
+                    <option value="for_sale">For Sale</option>
+                    <option value="for_rent">For Rent (Family Lease)</option>
+                    <option value="sold">Sold</option>
+                    <option value="pending">Pending Deal</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Editorial Description</label>
+                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Property Description & Highlights</label>
                 <textarea
                   rows={4}
-                  placeholder="Architectural highlights, panoramas, interior finishes, and provenance..."
+                  placeholder="Construction quality, bedrooms, kitchen fittings, Sui Gas connection, water bore, car porch details..."
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   className="w-full p-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 leading-relaxed"
@@ -2065,7 +2192,7 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                   className="w-4 h-4 accent-amber-600 cursor-pointer"
                 />
                 <label htmlFor="is_featured_chk_modal" className="font-semibold text-stone-800 cursor-pointer">
-                  Feature prominently on the Homepage Showcase (Top 6 residences)
+                  Feature prominently on Sadiqabad Homepage (Top Showcase)
                 </label>
               </div>
             </div>
@@ -2073,52 +2200,217 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
 
           {/* SECTION 2: SPECS */}
           {modalTab === 'specs' && (
-            <div className="space-y-4 animate-fadeIn">
+            <div className="space-y-5 animate-fadeIn">
+              {/* Quick Marla Sizing Helpers */}
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1.5">
+                  Quick Plot Size Selector
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: '3 Marla', marla: 3, sqft: 675 },
+                    { label: '5 Marla', marla: 5, sqft: 1125 },
+                    { label: '7 Marla', marla: 7, sqft: 1575 },
+                    { label: '10 Marla', marla: 10, sqft: 2250 },
+                    { label: '1 Kanal (20 Marla)', marla: 20, sqft: 4500 },
+                  ].map(item => (
+                    <button
+                      key={item.label}
+                      type="button"
+                      onClick={() => {
+                        setAreaMarla(item.marla);
+                        setAreaSqft(item.sqft);
+                      }}
+                      className="px-3 py-1.5 bg-stone-100 hover:bg-emerald-50 hover:text-emerald-900 border border-stone-200 hover:border-emerald-300 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Area (Marla) *</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="1"
+                    value={areaMarla}
+                    onChange={e => {
+                      const m = Number(e.target.value);
+                      setAreaMarla(m);
+                      setAreaSqft(marlaToSqft(m));
+                    }}
+                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Area (Sq Ft) *</label>
+                  <input
+                    type="number"
+                    min="100"
+                    value={areaSqft}
+                    onChange={e => {
+                      const s = Number(e.target.value);
+                      setAreaSqft(s);
+                      setAreaMarla(sqftToMarla(s));
+                    }}
+                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                  />
+                </div>
+
                 <div>
                   <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Bedrooms</label>
                   <input
                     type="number"
-                    min="1"
+                    min="0"
                     value={bedrooms}
                     onChange={e => setBedrooms(Number(e.target.value))}
                     className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
                   />
+                  <span className="text-[10px] text-stone-400">0 for commercial</span>
                 </div>
 
                 <div>
                   <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Bathrooms</label>
                   <input
                     type="number"
-                    min="1"
-                    step="0.5"
+                    min="0"
+                    step="1"
                     value={bathrooms}
                     onChange={e => setBathrooms(Number(e.target.value))}
                     className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
                   />
                 </div>
+              </div>
 
-                <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Area (Sq Ft)</label>
-                  <input
-                    type="number"
-                    min="100"
-                    value={areaSqft}
-                    onChange={e => setAreaSqft(Number(e.target.value))}
-                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
-                  />
+              <div>
+                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Year Built / Completed</label>
+                <input
+                  type="number"
+                  min="1990"
+                  max={new Date().getFullYear() + 2}
+                  value={yearBuilt}
+                  onChange={e => setYearBuilt(Number(e.target.value))}
+                  className="w-48 h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                />
+              </div>
+
+              {/* Sadiqabad House Construction & Legal Specs (گھر کی تفصیلی معلومات) */}
+              <div className="pt-4 border-t border-stone-200 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-stone-800">
+                    House Specifications & Utilities (گھر کی تفصیلی معلومات)
+                  </h4>
+                  <span className="text-[10px] text-stone-400">Displayed in House Details panel</span>
                 </div>
 
-                <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Year Built</label>
-                  <input
-                    type="number"
-                    min="1800"
-                    max={new Date().getFullYear() + 2}
-                    value={yearBuilt}
-                    onChange={e => setYearBuilt(Number(e.target.value))}
-                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                      Structure & Roof (لنٹر و تعمیر)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Single Story (RCC Lenter & Awwal Eent)"
+                      value={structureType}
+                      onChange={e => setStructureType(e.target.value)}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                      Registry & Legal Title (رجسٹری و انتقال)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 100% Registry & Intiqal Clear (رجسٹری انتقال پاس)"
+                      value={registryStatus}
+                      onChange={e => setRegistryStatus(e.target.value)}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                      Car Porch Size (کار پورچ)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Car Porch for Sedan (Corolla/City) & Bikes"
+                      value={carPorch}
+                      onChange={e => setCarPorch(e.target.value)}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                      Water Boring & Motor (میٹھا پانی بور)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Sweet Water Bore with 1HP Electric Motor"
+                      value={waterSource}
+                      onChange={e => setWaterSource(e.target.value)}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                      Sui Gas Status (سوئی گیس)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Sui Gas Meter Installed / Gas Available"
+                      value={gasStatus}
+                      onChange={e => setGasStatus(e.target.value)}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                      Electricity Meter (واپڈا میٹر)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Independent WAPDA Electric Meter Installed"
+                      value={electricity}
+                      onChange={e => setElectricity(e.target.value)}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                      Flooring & Marble (فرش)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Full Badal Marble & Ceramic Tiles"
+                      value={flooring}
+                      onChange={e => setFlooring(e.target.value)}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                      Street Width (گلی کا سائز)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. 30ft Wide Carpeted Street"
+                      value={streetWidth}
+                      onChange={e => setStreetWidth(e.target.value)}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -2127,35 +2419,54 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
           {/* SECTION 3: LOCATION */}
           {modalTab === 'location' && (
             <div className="space-y-4 animate-fadeIn">
+              <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-xs text-emerald-900 font-medium">
+                Website is locked strictly to <strong>Sadiqabad City</strong>. All properties belong exclusively to Sadiqabad residential colonies and commercial sectors.
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Sadiqabad Colony / Locality *</label>
+                  <select
+                    value={locality}
+                    onChange={e => setLocality(e.target.value)}
+                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold cursor-pointer"
+                  >
+                    {SADIQABAD_LOCALITIES.map(loc => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">City (Fixed) *</label>
+                  <input
+                    type="text"
+                    readOnly
+                    value="Sadiqabad"
+                    className="w-full h-10 px-3 bg-stone-100 border border-stone-200 rounded-lg text-stone-700 font-bold cursor-not-allowed"
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Street Address</label>
+                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Street Address / Landmark *</label>
                 <input
                   type="text"
-                  placeholder="e.g. 10771 Bellagio Road"
+                  required
+                  placeholder="e.g. Street 4, Sector B, Near Jamia Masjid"
                   value={address}
                   onChange={e => setAddress(e.target.value)}
-                  className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                  className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-medium"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">City *</label>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Province</label>
                   <input
                     type="text"
-                    required
-                    placeholder="e.g. Bel-Air, Aspen, New York..."
-                    value={city}
-                    onChange={e => setCity(e.target.value)}
-                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">State / Province</label>
-                  <input
-                    type="text"
-                    placeholder="CA, NY, FL, CO..."
                     value={state}
                     onChange={e => setState(e.target.value)}
                     className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
@@ -2166,25 +2477,24 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                   <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Postal Code</label>
                   <input
                     type="text"
-                    placeholder="90077"
                     value={postalCode}
                     onChange={e => setPostalCode(e.target.value)}
                     className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
                   <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Country</label>
                   <input
                     type="text"
+                    readOnly
                     value={country}
-                    onChange={e => setCountry(e.target.value)}
-                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    className="w-full h-10 px-3 bg-stone-100 border border-stone-200 rounded-lg text-stone-700 font-medium cursor-not-allowed"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Latitude</label>
                   <input
@@ -2213,45 +2523,107 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
           {/* SECTION 4: GALLERY MEDIA */}
           {modalTab === 'media' && (
             <div className="space-y-5 animate-fadeIn">
-              {/* Primary Cover Image */}
-              <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-stone-900 uppercase tracking-wider text-[11px]">
-                    Primary Cover Image URL *
-                  </span>
-                  <span className="text-[10px] text-amber-800 font-semibold">Featured on Cards & Detail Hero</span>
-                </div>
+              {/* Device Photo Upload Dropzone / Action Card */}
+              <div className="p-6 bg-amber-50/70 border-2 border-dashed border-amber-300 rounded-2xl text-center space-y-3">
                 <input
-                  type="url"
-                  required
-                  placeholder="https://images.unsplash.com/..."
-                  value={featuredImage}
-                  onChange={e => handleSetPrimaryImage(e.target.value)}
-                  className="w-full h-10 px-3 bg-white border border-stone-200 rounded-lg text-stone-900"
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  accept="image/png,image/jpeg,image/webp,image/jpg"
+                  multiple
+                  className="hidden"
+                  id="device-photo-input"
                 />
-
-                {featuredImage && (
-                  <div className="relative aspect-[16/9] w-full max-w-sm rounded-lg overflow-hidden border border-stone-300 shadow-sm">
-                    <img src={featuredImage} alt="Cover preview" className="w-full h-full object-cover" />
-                    <span className="absolute bottom-2 left-2 bg-stone-900/80 text-white text-[10px] px-2 py-0.5 rounded font-mono">
-                      Cover Active
-                    </span>
-                  </div>
-                )}
+                <div className="w-12 h-12 bg-amber-100 text-amber-900 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                  {isUploadingPhoto ? (
+                    <Loader2 className="w-6 h-6 animate-spin text-amber-700" />
+                  ) : (
+                    <Camera className="w-6 h-6 text-amber-700" />
+                  )}
+                </div>
+                <div>
+                  <h4 className="font-serif text-base font-bold text-stone-900">
+                    Upload Real Property Photos from Device
+                  </h4>
+                  <p className="text-xs text-stone-600 mt-0.5 max-w-md mx-auto">
+                    Select JPG, PNG, or WEBP photos from your mobile phone or computer. Images are optimized automatically for instant loading across the website.
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    disabled={isUploadingPhoto}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl flex items-center gap-2 cursor-pointer shadow-md transition-all hover:scale-[1.02] disabled:opacity-50"
+                  >
+                    {isUploadingPhoto ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Optimizing & Adding Photos...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="w-4 h-4 text-amber-400" />
+                        <span>Choose Photos from Device</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
-              {/* Add New Image or Choose from Presets */}
+              {/* Primary Cover Image Preview & Selection */}
               <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-stone-900 uppercase tracking-wider text-[11px]">
-                    Add Gallery Photo URL
+                    Active Primary Cover Photo *
+                  </span>
+                  <span className="text-[10px] text-amber-800 font-semibold">Featured on Cards & Hero</span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 items-start">
+                  {featuredImage ? (
+                    <div className="relative aspect-[16/9] w-full sm:w-64 rounded-lg overflow-hidden border border-stone-300 shadow-sm shrink-0 bg-stone-900">
+                      <img src={featuredImage} alt="Cover preview" className="w-full h-full object-cover" />
+                      <span className="absolute bottom-2 left-2 bg-stone-900/90 text-amber-300 text-[10px] px-2 py-0.5 rounded font-mono font-bold">
+                        ★ Cover Active
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="aspect-[16/9] w-full sm:w-64 rounded-lg border border-dashed border-stone-300 flex items-center justify-center text-xs text-stone-400 shrink-0 bg-stone-100">
+                      No cover selected
+                    </div>
+                  )}
+
+                  <div className="flex-1 space-y-2 w-full">
+                    <label className="block text-[11px] font-semibold text-stone-600">
+                      Or paste an external web photo URL:
+                    </label>
+                    <input
+                      type="url"
+                      placeholder="https://..."
+                      value={featuredImage.startsWith('data:') ? '' : featuredImage}
+                      onChange={e => handleSetPrimaryImage(e.target.value)}
+                      className="w-full h-10 px-3 bg-white border border-stone-200 rounded-lg text-stone-900 text-xs"
+                    />
+                    <p className="text-[10px] text-stone-400">
+                      Tip: You can also click "Set Cover" on any uploaded image thumbnail below.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Add Web Image or Choose from Presets */}
+              <div className="p-4 bg-stone-50 rounded-xl border border-stone-200 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-stone-900 uppercase tracking-wider text-[11px]">
+                    Add Web Photo by URL or Presets
                   </span>
                   <select
                     onChange={e => {
                       if (e.target.value) handleAddGalleryImage(e.target.value);
                     }}
                     defaultValue=""
-                    className="text-[11px] bg-white border border-stone-300 rounded px-2 py-1 font-semibold text-stone-700"
+                    className="text-[11px] bg-white border border-stone-300 rounded px-2 py-1 font-semibold text-stone-700 cursor-pointer"
                   >
                     <option value="" disabled>
                       + Choose from Luxury Presets
@@ -2267,7 +2639,7 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                 <div className="flex gap-2">
                   <input
                     type="url"
-                    placeholder="Paste high-res image URL (e.g. Unsplash)..."
+                    placeholder="Paste image URL (e.g. Unsplash, CDN)..."
                     value={newImageUrl}
                     onChange={e => setNewImageUrl(e.target.value)}
                     className="flex-1 h-10 px-3 bg-white border border-stone-200 rounded-lg text-stone-900"
@@ -2277,31 +2649,45 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                     onClick={() => handleAddGalleryImage(newImageUrl)}
                     className="px-4 py-2 bg-stone-900 hover:bg-stone-800 text-white font-bold rounded-lg cursor-pointer shrink-0"
                   >
-                    Add to Gallery
+                    Add URL
                   </button>
                 </div>
               </div>
 
               {/* Gallery Grid */}
               <div className="space-y-2">
-                <span className="font-bold text-stone-700 uppercase tracking-wider text-[11px] block">
-                  Current Gallery Images ({galleryUrls.length})
-                </span>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-stone-700 uppercase tracking-wider text-[11px] block">
+                    Current Gallery Photos ({galleryUrls.length})
+                  </span>
+                  {galleryUrls.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGalleryUrls([]);
+                        setFeaturedImage('');
+                      }}
+                      className="text-[10px] text-red-600 hover:underline font-bold cursor-pointer"
+                    >
+                      Clear All Photos
+                    </button>
+                  )}
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {galleryUrls.map((url, idx) => (
                     <div
-                      key={url + idx}
+                      key={url.slice(0, 40) + idx}
                       className={`relative group rounded-xl overflow-hidden border aspect-[4/3] bg-stone-100 ${
                         url === featuredImage ? 'border-amber-500 ring-2 ring-amber-400' : 'border-stone-200'
                       }`}
                     >
                       <img src={url} alt={`Gallery item ${idx + 1}`} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-stone-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
+                      <div className="absolute inset-0 bg-stone-950/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
                         {url !== featuredImage && (
                           <button
                             type="button"
                             onClick={() => handleSetPrimaryImage(url)}
-                            className="bg-amber-500 text-stone-950 font-bold px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-amber-400"
+                            className="bg-amber-500 text-stone-950 font-bold px-2.5 py-1 rounded text-[10px] cursor-pointer hover:bg-amber-400 shadow"
                           >
                             Set Cover
                           </button>
@@ -2309,13 +2695,13 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                         <button
                           type="button"
                           onClick={() => handleRemoveGalleryImage(idx)}
-                          className="bg-red-600 text-white font-bold px-2 py-1 rounded text-[10px] cursor-pointer hover:bg-red-700"
+                          className="bg-red-600 text-white font-bold px-2.5 py-1 rounded text-[10px] cursor-pointer hover:bg-red-700 shadow"
                         >
                           Remove
                         </button>
                       </div>
                       {url === featuredImage && (
-                        <span className="absolute top-1.5 left-1.5 bg-amber-500 text-stone-950 font-bold text-[9px] px-1.5 py-0.5 rounded">
+                        <span className="absolute top-1.5 left-1.5 bg-amber-500 text-stone-950 font-bold text-[9px] px-1.5 py-0.5 rounded shadow">
                           Cover
                         </span>
                       )}

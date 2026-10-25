@@ -109,6 +109,10 @@ export async function resetDefaultInquiries(): Promise<PropertyInquiry[]> {
   return INITIAL_INQUIRIES;
 }
 
+export async function clearAllInquiries(): Promise<void> {
+  saveInquiries([]);
+}
+
 export function exportInquiriesCsv(): void {
   const list = getInquiries();
   const headers = ['ID', 'Date', 'Status', 'Type', 'Client Name', 'Email', 'Phone', 'Property', 'Message', 'Preferred Schedule', 'Agency Notes'];

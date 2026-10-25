@@ -52,15 +52,14 @@ export const ContactPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 space-y-16">
       <div className="max-w-2xl space-y-3">
-        <span className="text-xs font-mono tracking-widest uppercase text-amber-800 block">
-          Private Client Services
+        <span className="text-xs font-mono tracking-widest uppercase text-emerald-800 font-bold block">
+          Sadiqabad Real Estate Agency
         </span>
         <h1 className="font-serif text-4xl sm:text-6xl text-stone-900 leading-tight">
-          Concierge Directory
+          Contact Our Sadiqabad Office
         </h1>
         <p className="text-stone-600 text-xs sm:text-sm leading-relaxed">
-          Our global client desk coordinates confidential private viewings, bespoke dossiers, and discreet acquisition
-          advice for private investors and family offices.
+          Reach our Sadiqabad property consultants on Main KLP Road for family property visits, registry checks, or to list your house or commercial property.
         </p>
       </div>
 

@@ -80,22 +80,21 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenEnquiry 
       {/* Executive Presence Box */}
       <div className="bg-stone-900 text-stone-100 rounded-2xl p-10 sm:p-14 border border-stone-800 flex flex-col md:flex-row items-center justify-between gap-8">
         <div className="space-y-2 max-w-xl">
-          <span className="text-[11px] font-mono tracking-widest uppercase text-amber-400">Beverly Hills Headquarters</span>
+          <span className="text-[11px] font-mono tracking-widest uppercase text-emerald-400 font-bold">Sadiqabad Main Office</span>
           <h3 className="font-serif text-3xl sm:text-4xl text-stone-100">
-            Visit Our Private Concierge
+            Visit Our Sadiqabad Office
           </h3>
           <p className="text-xs sm:text-sm text-stone-400 leading-relaxed">
-            Located on North Rodeo Drive, our salon is available by appointment for confidential property consultations,
-            private dossier presentations, and acquisition strategy meetings.
+            Located conveniently on Main KLP Road near Railway Station Chowk, Sadiqabad. Available for in-person property consultations, family inspection tours, and direct ownership registry verification.
           </p>
         </div>
 
         <button
           type="button"
           onClick={onOpenEnquiry}
-          className="bg-amber-600 hover:bg-amber-500 text-stone-950 font-bold text-xs px-8 py-4 rounded-full shadow-lg transition-all cursor-pointer flex-shrink-0"
+          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-8 py-4 rounded-full shadow-lg transition-all cursor-pointer flex-shrink-0"
         >
-          Book Consultation
+          Book Property Visit
         </button>
       </div>
     </div>

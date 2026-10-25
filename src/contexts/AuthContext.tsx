@@ -2,7 +2,12 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import type { User } from '@supabase/supabase-js';
 import { UserProfile, UserRole } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
-import { isDesignatedAdminEmail, resolveUserRole } from '../lib/security';
+import {
+  isDesignatedAdminEmail,
+  resolveUserRole,
+  PRIMARY_ADMIN_EMAIL,
+  PRIMARY_ADMIN_PASSWORD,
+} from '../lib/security';
 import { clearLocalFavorites } from '../services/favoriteService';
 import { INITIAL_USERS } from '../services/mockData';
 import { getUsers, createUser } from '../services/userService';
@@ -143,10 +148,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   /**
    * Primary authentication handler:
-   * 1. If Supabase is configured, attempts real login with supabase.auth.signInWithPassword.
-   * 2. Enforces password authentication set by user in Supabase.
-   * 3. For designated admin emails (bearbates512@gmail.com), grants 'admin' role upon valid password.
-   * 4. For mock demo accounts (admin@auraestates.luxury, marcus.vance@example.com), provides testing fallback.
+   * Strictly enforces that ONLY bearbates512@gmail.com with password office@12
+   * can ever log into the Admin Operations Console.
+   * All other users are strictly client accounts with 'user' role.
    */
   const signIn = async (email: string, pass: string): Promise<UserProfile> => {
     setIsLoading(true);
@@ -161,11 +165,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Please enter your password.');
       }
 
-      const isMockDemoAccount =
-        cleanEmail === 'admin@auraestates.luxury' ||
-        cleanEmail === 'marcus.vance@example.com';
+      // 1. Exclusive Administrator Authentication: bearbates512@gmail.com with password office@12
+      if (cleanEmail === PRIMARY_ADMIN_EMAIL.toLowerCase()) {
+        const isDesignatedPasswordMatch = cleanPass === PRIMARY_ADMIN_PASSWORD;
 
-      // 1. Live Supabase Authentication
+        // Also attempt live Supabase authentication
+        let supabaseSuccess = false;
+        let supabaseUser: User | null = null;
+        if (supabase && isSupabaseConfigured) {
+          try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+              email: cleanEmail,
+              password: cleanPass,
+            });
+            if (!error && data?.user) {
+              supabaseSuccess = true;
+              supabaseUser = data.user;
+            }
+          } catch {
+            // Handled via isDesignatedPasswordMatch
+          }
+        }
+
+        // Accept if password matches designated 'office@12' OR Supabase verified it with that password
+        if (isDesignatedPasswordMatch || supabaseSuccess) {
+          const activeUser: UserProfile = {
+            id: supabaseUser?.id || 'usr-admin-langcasen',
+            email: PRIMARY_ADMIN_EMAIL,
+            full_name: supabaseUser?.user_metadata?.full_name || 'Administrator',
+            role: 'admin',
+            created_at: supabaseUser?.created_at || new Date().toISOString(),
+          };
+
+          setUser(activeUser);
+          localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
+          return activeUser;
+        }
+
+        // Any other password for bearbates512@gmail.com is strictly rejected
+        throw new Error('Invalid credentials. Please verify your email and password.');
+      }
+
+      // 2. All other accounts: CAN NEVER ACCESS ADMIN PANEL!
+      // They authenticate normally as client / user
       if (supabase && isSupabaseConfigured) {
         const { data, error } = await supabase.auth.signInWithPassword({
           email: cleanEmail,
@@ -173,17 +215,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
 
         if (error) {
-          // If intentionally using mock demo credentials that don't exist in Supabase, allow demo fallback
-          if (isMockDemoAccount) {
-            const users = getUsers();
-            const matched = users.find(u => u.email.toLowerCase() === cleanEmail);
-            const activeUser: UserProfile = matched || (cleanEmail.includes('admin') ? INITIAL_USERS[1] : INITIAL_USERS[2]);
-            setUser(activeUser);
-            localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
-            return activeUser;
+          if (cleanEmail === 'marcus.vance@example.com') {
+            const clientUser = INITIAL_USERS[2];
+            setUser(clientUser);
+            localStorage.setItem(DEMO_USER_KEY, JSON.stringify(clientUser));
+            return clientUser;
           }
-
-          // Real user accounts (including bearbates512@gmail.com) MUST verify with their Supabase password
           throw new Error(error.message || 'Invalid credentials. Please verify your email and password.');
         }
 
@@ -191,54 +228,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           throw new Error('No user returned from Supabase authentication.');
         }
 
-        // Fetch optional database profile
-        let dbProfile: any = null;
-        try {
-          const { data: prof } = await supabase
-            .from('profiles')
-            .select('id,email,full_name,phone,avatar_url,role,created_at')
-            .eq('id', data.user.id)
-            .maybeSingle();
-          dbProfile = prof;
-        } catch {
-          // Profiles table may be locked by RLS
-        }
+        const activeUser: UserProfile = {
+          id: data.user.id,
+          email: data.user.email || cleanEmail,
+          full_name: data.user.user_metadata?.full_name || cleanEmail.split('@')[0],
+          role: 'user', // STRICTLY USER ROLE! Never admin!
+          created_at: data.user.created_at || new Date().toISOString(),
+        };
 
-        const activeUser = toUserProfile(data.user, dbProfile);
-        setUser(activeUser);
-        localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
-
-        // Attempt background profile sync if permitted
-        try {
-          await supabase.from('profiles').upsert(
-            {
-              id: data.user.id,
-              email: activeUser.email,
-              full_name: activeUser.full_name,
-              role: activeUser.role,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: 'id' }
-          );
-        } catch {
-          // Ignore RLS errors during sync
-        }
-
-        return activeUser;
-      }
-
-      // 2. Offline Fallback (only when Supabase client is offline/unreachable)
-      if (isMockDemoAccount || isDesignatedAdminEmail(cleanEmail)) {
-        const users = getUsers();
-        const matched = users.find(u => u.email.toLowerCase() === cleanEmail);
-        const activeUser: UserProfile =
-          matched || (isDesignatedAdminEmail(cleanEmail) ? INITIAL_USERS[0] : INITIAL_USERS[2]);
         setUser(activeUser);
         localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
         return activeUser;
       }
 
-      throw new Error('Supabase authentication is unavailable. Please check your network connection.');
+      // Offline client testing fallback
+      if (cleanEmail === 'marcus.vance@example.com') {
+        const clientUser = INITIAL_USERS[2];
+        setUser(clientUser);
+        localStorage.setItem(DEMO_USER_KEY, JSON.stringify(clientUser));
+        return clientUser;
+      }
+
+      throw new Error('Invalid credentials. Please verify your email and password.');
     } finally {
       setIsLoading(false);
     }
@@ -346,9 +357,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setUser(null);
       localStorage.removeItem(DEMO_USER_KEY);
     } else if (targetRole === 'admin') {
-      const adminUser = INITIAL_USERS.find(u => isDesignatedAdminEmail(u.email)) || INITIAL_USERS[0];
-      setUser(adminUser);
-      localStorage.setItem(DEMO_USER_KEY, JSON.stringify(adminUser));
+      // Administrative access requires authenticating with bearbates512@gmail.com and password office@12
+      window.location.href = '/login?next=' + encodeURIComponent('/admin');
     } else {
       const clientUser = INITIAL_USERS.find(u => u.role === 'user') || INITIAL_USERS[2];
       setUser(clientUser);

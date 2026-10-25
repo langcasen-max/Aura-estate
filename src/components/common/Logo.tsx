@@ -206,13 +206,13 @@ export const Logo: React.FC<LogoProps> = ({
           <span
             className={`${titleSizeMap[size]} uppercase block leading-none ${textColor} ${hoverText} transition-colors`}
           >
-            AURA ESTATES
+            SADIQABAD ESTATES
           </span>
           {showTagline && (
             <span
               className={`${taglineSizeMap[size]} uppercase ${subtextColor} block mt-1.5 font-medium tracking-[0.32em]`}
             >
-              Private Residences
+              Sadiqabad City Properties
             </span>
           )}
         </div>
@@ -228,18 +228,18 @@ export const Logo: React.FC<LogoProps> = ({
         <span
           className={`font-serif ${titleSizeMap[size]} text-lg sm:text-xl md:text-2xl uppercase block leading-none ${textColor} ${hoverText} transition-colors font-semibold`}
         >
-          AURA ESTATES
+          SADIQABAD ESTATES
         </span>
         {showTagline && (
           <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
             <span
               className={`${taglineSizeMap[size]} text-[8px] sm:text-[9.5px] uppercase ${subtextColor} block tracking-[0.24em] sm:tracking-[0.28em]`}
             >
-              Private Residences
+              Sadiqabad City Properties
             </span>
             <span className="w-1 h-1 rounded-full bg-amber-400 hidden md:inline-block shadow-[0_0_6px_rgba(251,191,36,0.8)]" />
             <span className="text-[8px] tracking-[0.22em] uppercase text-stone-300 font-mono hidden md:inline-block opacity-75">
-              Est. 2014
+              Verified Properties
             </span>
           </div>
         )}

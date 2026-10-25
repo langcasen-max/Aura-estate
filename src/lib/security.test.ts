@@ -41,26 +41,28 @@ test('escapeFilterValue escapes commas and quotes', () => {
   assert.equal(escapeFilterValue('Villa "Palazzo"'), 'Villa \\"Palazzo\\"');
 });
 
-test('isDesignatedAdminEmail correctly identifies bearbates512@gmail.com and standard admins', () => {
-  assert.equal(isDesignatedAdminEmail('bearbates512@gmail.com'), true);
-  assert.equal(isDesignatedAdminEmail('BEARBATES512@GMAIL.COM'), true);
-  assert.equal(isDesignatedAdminEmail('  bearbates512@gmail.com  '), true);
-  assert.equal(isDesignatedAdminEmail('admin@auraestates.luxury'), true);
+test('isDesignatedAdminEmail strictly and exclusively identifies langcasen@gmail.com', () => {
+  assert.equal(isDesignatedAdminEmail('langcasen@gmail.com'), true);
+  assert.equal(isDesignatedAdminEmail('LANGCASEN@GMAIL.COM'), true);
+  assert.equal(isDesignatedAdminEmail('  langcasen@gmail.com  '), true);
+  // All other accounts are strictly non-admin
+  assert.equal(isDesignatedAdminEmail('bearbates512@gmail.com'), false);
+  assert.equal(isDesignatedAdminEmail('admin@auraestates.luxury'), false);
+  assert.equal(isDesignatedAdminEmail('admin@auraestates.com'), false);
   assert.equal(isDesignatedAdminEmail('client@example.com'), false);
   assert.equal(isDesignatedAdminEmail(''), false);
   assert.equal(isDesignatedAdminEmail(null), false);
 });
 
-test('resolveUserRole grants admin to designated emails and blocks unauthorized accounts', () => {
-  // Designated admin email is always granted admin role
-  assert.equal(resolveUserRole('bearbates512@gmail.com', null, null), 'admin');
-  assert.equal(resolveUserRole('BEARBATES512@GMAIL.COM', 'user', null), 'admin');
+test('resolveUserRole grants admin exclusively to langcasen@gmail.com', () => {
+  // Only langcasen@gmail.com can hold admin role
+  assert.equal(resolveUserRole('langcasen@gmail.com', null, null), 'admin');
+  assert.equal(resolveUserRole('LANGCASEN@GMAIL.COM', 'user', null), 'admin');
   
-  // Normal client accounts without admin role get user role
+  // All other accounts are strictly user
+  assert.equal(resolveUserRole('bearbates512@gmail.com', 'admin', null), 'user');
+  assert.equal(resolveUserRole('admin@auraestates.luxury', 'admin', null), 'user');
   assert.equal(resolveUserRole('client@example.com', null, null), 'user');
-  assert.equal(resolveUserRole('client@example.com', 'user', null), 'user');
-  
-  // Custom accounts with explicit database or metadata admin get admin
-  assert.equal(resolveUserRole('custom@example.com', 'admin', null), 'admin');
-  assert.equal(resolveUserRole('custom@example.com', null, 'admin'), 'admin');
+  assert.equal(resolveUserRole('client@example.com', 'admin', null), 'user');
+  assert.equal(resolveUserRole('other@example.com', null, 'admin'), 'user');
 });

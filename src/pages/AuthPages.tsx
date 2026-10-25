@@ -127,76 +127,56 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        {/* Configured Supabase Administrator Account */}
+        {/* Exclusive Authorized Administrator Account */}
         <div className="p-3.5 bg-amber-500/10 border border-amber-500/25 rounded-xl space-y-2 text-left">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-950 flex items-center gap-1.5">
               <ShieldCheck className="w-4 h-4 text-amber-700" />
-              Configured Admin Account
+              Exclusive Admin Credentials
             </span>
             <span className="text-[10px] font-mono text-amber-800 bg-amber-100/90 px-1.5 py-0.5 rounded border border-amber-300/60 font-semibold">
-              Live Supabase Auth
+              Authorized Only
             </span>
           </div>
-          <p className="text-xs text-stone-700 leading-relaxed">
-            Admin Email: <strong className="text-stone-900 font-mono font-bold">bearbates512@gmail.com</strong>
-          </p>
-          <div className="flex items-center justify-between pt-1">
+          <div className="space-y-0.5 text-xs text-stone-700">
+            <p>Admin Email: <strong className="text-stone-900 font-mono font-bold">langcasen@gmail.com</strong></p>
+            <p className="text-[11px] text-stone-500">Admin Password: <span className="font-mono bg-stone-100 px-1.5 py-0.5 rounded text-stone-900 font-bold">office@12</span></p>
+          </div>
+          <div className="pt-1 flex items-center justify-between">
             <button
               type="button"
               onClick={() => {
-                setEmail('bearbates512@gmail.com');
-                const pwdInput = document.querySelector('input[type="password"]') as HTMLInputElement;
-                if (pwdInput) pwdInput.focus();
+                setEmail('langcasen@gmail.com');
+                setPassword('office@12');
               }}
               className="text-xs text-amber-800 hover:text-amber-950 font-bold underline cursor-pointer"
             >
-              Fill bearbates512@gmail.com
+              Auto-fill Admin Credentials
             </button>
-            <span className="text-[10px] text-stone-500 italic">Enter your Supabase password</span>
+            <span className="text-[10px] text-amber-900/80 font-medium">Only this account can open /admin</span>
           </div>
         </div>
 
-        {/* Demo Quick Sign-In Options */}
+        {/* Demo Client Access for testing public visitor/client portal */}
         <div className="pt-2 border-t border-stone-100 space-y-2">
           <div className="flex items-center justify-between text-[11px] text-stone-500 font-medium">
-            <span>Offline Demo Sandbox</span>
-            <span className="text-[10px] font-mono text-amber-700 uppercase tracking-wider bg-amber-50 px-2 py-0.5 rounded border border-amber-200/60">Local test</span>
+            <span>Client Portal Test</span>
+            <span className="text-[10px] font-mono text-stone-600 bg-stone-100 px-1.5 py-0.5 rounded">Standard Client</span>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={async () => {
-                setEmail('admin@auraestates.luxury');
-                setPassword('admin123');
-                await signIn('admin@auraestates.luxury', 'admin123');
-                const requestedPath = new URLSearchParams(window.location.search).get('next');
-                const safePath = requestedPath && requestedPath.startsWith('/') && !requestedPath.startsWith('//') ? requestedPath : '/admin';
-                onNavigate(safePath);
-              }}
-              className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-700" />
-              <span>Admin Portal</span>
-            </button>
-            <button
-              type="button"
-              disabled={isLoading}
-              onClick={async () => {
-                setEmail('marcus.vance@example.com');
-                setPassword('client123');
-                await signIn('marcus.vance@example.com', 'client123');
-                const requestedPath = new URLSearchParams(window.location.search).get('next');
-                const safePath = requestedPath && requestedPath.startsWith('/') && !requestedPath.startsWith('//') ? requestedPath : '/dashboard';
-                onNavigate(safePath);
-              }}
-              className="px-3 py-2.5 bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
-            >
-              <User className="w-3.5 h-3.5 text-stone-600" />
-              <span>Client Portal</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            disabled={isLoading}
+            onClick={async () => {
+              setEmail('marcus.vance@example.com');
+              setPassword('client123');
+              await signIn('marcus.vance@example.com', 'client123');
+              onNavigate('/dashboard');
+            }}
+            className="w-full px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-900 text-xs font-semibold rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer text-center"
+          >
+            <User className="w-3.5 h-3.5 text-stone-600" />
+            <span>Sign In as Marcus Vance (Client Portal)</span>
+          </button>
         </div>
 
         <div className="text-center text-xs text-stone-500 pt-2 border-t border-stone-100">

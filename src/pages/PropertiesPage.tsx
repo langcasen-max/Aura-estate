@@ -24,7 +24,8 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
     return {
       listing_status: (params.get('listing_status') as any) || 'all',
       property_type: (params.get('type') as any) || 'all',
-      city: params.get('city') || 'all',
+      locality: params.get('locality') || 'all',
+      city: 'Sadiqabad',
       search: params.get('q') || '',
       min_price: params.get('min_price') ? Number(params.get('min_price')) : undefined,
       max_price: params.get('max_price') ? Number(params.get('max_price')) : undefined,
@@ -44,14 +45,15 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
   });
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
 
-  // Re-sync filters if navigation passes new search query (e.g. from Navbar Acquire / Lease links)
+  // Re-sync filters if navigation passes new search query
   useEffect(() => {
     if (initialSearchQuery !== undefined) {
       const params = new URLSearchParams(initialSearchQuery);
       setFilters({
         listing_status: (params.get('listing_status') as any) || 'all',
         property_type: (params.get('type') as any) || 'all',
-        city: params.get('city') || 'all',
+        locality: params.get('locality') || 'all',
+        city: 'Sadiqabad',
         search: params.get('q') || '',
         min_price: params.get('min_price') ? Number(params.get('min_price')) : undefined,
         max_price: params.get('max_price') ? Number(params.get('max_price')) : undefined,
@@ -69,7 +71,7 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
     const params = new URLSearchParams();
     if (filters.listing_status && filters.listing_status !== 'all') params.set('listing_status', filters.listing_status);
     if (filters.property_type && filters.property_type !== 'all') params.set('type', filters.property_type);
-    if (filters.city && filters.city !== 'all') params.set('city', filters.city);
+    if (filters.locality && filters.locality !== 'all') params.set('locality', filters.locality);
     if (filters.search) params.set('q', filters.search);
     if (filters.sort_by && filters.sort_by !== 'newest') params.set('sort', filters.sort_by);
     if (filters.page_size && filters.page_size !== 12) params.set('page_size', String(filters.page_size));
@@ -79,8 +81,8 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
     window.history.replaceState({}, '', newUrl);
 
     updatePageSeo({
-      title: 'Current Residences Catalogue',
-      description: 'Explore premier luxury estates, waterfront villas, and penthouses available for acquisition and lease.',
+      title: 'Sadiqabad Properties Catalogue — Houses, Plots & Commercial',
+      description: 'Explore verified residential houses, plots, and commercial shops exclusively in Sadiqabad City, Punjab.',
     });
   }, [filters, showSavedOnly]);
 
@@ -128,7 +130,8 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
     setFilters({
       listing_status: 'all',
       property_type: 'all',
-      city: 'all',
+      locality: 'all',
+      city: 'Sadiqabad',
       search: '',
       bedrooms: 'all',
       sort_by: 'newest',
@@ -152,16 +155,16 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
       {/* Page Title & Breadcrumb Header */}
       <div className="mb-8 pb-6 border-b border-stone-200 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <span className="text-xs font-mono tracking-widest uppercase text-amber-800 block mb-1">
-            Catalogue
+          <span className="text-xs font-mono tracking-widest uppercase text-emerald-800 font-bold block mb-1">
+            Sadiqabad City Directory
           </span>
           <h1 className="font-serif text-3xl sm:text-5xl text-stone-900 leading-tight">
-            {showSavedOnly ? 'Saved Private Residences' : 'Curated Residential Catalogue'}
+            {showSavedOnly ? 'Saved Sadiqabad Properties' : 'Sadiqabad Properties Catalogue'}
           </h1>
           <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-xl">
             {showSavedOnly
-              ? 'Your private selection of bookmarked luxury acquisitions and residences.'
-              : 'Browse our complete international portfolio of prime villas, penthouses, and historic estates.'}
+              ? 'Your private selection of bookmarked Sadiqabad houses and commercial listings.'
+              : 'Browse verified double-story houses, plots, and commercial spaces across Model Town, Allama Iqbal Town, Mazhar Fareed, Satellite Town, and KLP Road.'}
           </p>
         </div>
 

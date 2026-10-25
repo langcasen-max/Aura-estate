@@ -3,6 +3,7 @@ import { Property, PropertyMedia } from '../types';
 import { getPropertyByIdOrSlug, getRelatedProperties } from '../services/propertyService';
 import { isPropertyFavorite, toggleFavorite } from '../services/favoriteService';
 import { PropertyCard } from '../components/property/PropertyCard';
+import { formatPKR, formatArea } from '../lib/formatters';
 import { updatePageSeo } from '../lib/seo';
 import {
   Bed,
@@ -20,6 +21,16 @@ import {
   ChevronRight,
   Maximize,
   X,
+  Phone,
+  MessageCircle,
+  Building,
+  FileCheck,
+  Car,
+  Droplets,
+  Flame,
+  Zap,
+  Layers,
+  Navigation,
 } from 'lucide-react';
 
 interface PropertyDetailPageProps {
@@ -128,10 +139,7 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
     ...(property.media?.map((m: PropertyMedia) => m.url).filter((u: string) => u !== property.featured_image) || []),
   ];
 
-  const formattedPrice =
-    property.listing_status === 'for_rent'
-      ? `$${property.price.toLocaleString()} / month`
-      : `$${property.price.toLocaleString()}`;
+  const formattedPrice = formatPKR(property.price, property.listing_status === 'for_rent');
 
   const isFav = isPropertyFavorite(property.id);
 
@@ -275,10 +283,10 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
               {property.title}
             </h1>
 
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-stone-500 font-medium">
-              <MapPin className="w-4 h-4 text-stone-400 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-stone-600 font-medium">
+              <MapPin className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <span>
-                {property.location.address}, {property.location.city}, {property.location.state} {property.location.postal_code}
+                {property.location.address}, {property.location.locality ? `${property.location.locality}, ` : ''}Sadiqabad, Punjab 64350
               </span>
             </div>
           </div>
@@ -290,24 +298,24 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
               <div className="font-serif text-2xl font-bold text-stone-900">{formattedPrice}</div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">Interior Area</div>
-              <div className="text-lg font-bold text-stone-800 flex items-center gap-1.5">
-                <Maximize2 className="w-4 h-4 text-stone-400" />
-                <span>{property.area_sqft.toLocaleString()} sq ft</span>
+              <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">Plot & Covered Area</div>
+              <div className="text-base sm:text-lg font-bold text-stone-800 flex items-center gap-1.5">
+                <Maximize2 className="w-4 h-4 text-emerald-600" />
+                <span>{formatArea(property.area_sqft, property.area_marla)}</span>
               </div>
             </div>
             <div>
               <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">Accommodations</div>
-              <div className="text-lg font-bold text-stone-800 flex items-center gap-1.5">
+              <div className="text-base sm:text-lg font-bold text-stone-800 flex items-center gap-1.5">
                 <Bed className="w-4 h-4 text-stone-400" />
-                <span>{property.bedrooms} Beds • {property.bathrooms} Baths</span>
+                <span>{property.bedrooms > 0 ? `${property.bedrooms} Beds • ${property.bathrooms} Baths` : 'Commercial Unit'}</span>
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">Year Completed</div>
-              <div className="text-lg font-bold text-stone-800 flex items-center gap-1.5">
+              <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">Year Built</div>
+              <div className="text-base sm:text-lg font-bold text-stone-800 flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-stone-400" />
-                <span>{property.year_built || 'Recent'}</span>
+                <span>{property.year_built || 'Newly Built'}</span>
               </div>
             </div>
           </div>
@@ -315,17 +323,115 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
           {/* Editorial Narrative Description */}
           <div className="space-y-4">
             <h3 className="font-serif text-2xl text-stone-900 border-b border-stone-100 pb-2">
-              Architectural Overview & Narrative
+              Property Details & Overview
             </h3>
-            <p className="text-stone-700 text-sm sm:text-base leading-relaxed font-light whitespace-pre-line">
-              {property.description}
-            </p>
+            <div className="p-6 bg-stone-50/70 rounded-2xl border border-stone-200/90 space-y-4">
+              <p className="text-stone-800 text-sm sm:text-base leading-relaxed whitespace-pre-line font-normal">
+                {property.description}
+              </p>
+            </div>
           </div>
+
+          {/* Structured House Specifications Box (گھر کی تفصیلی اور تکنیکی معلومات) */}
+          {property.features && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-2">
+                <h3 className="font-serif text-2xl text-stone-900">
+                  House Specifications & Construction Details
+                </h3>
+                <span className="text-xs font-semibold text-emerald-900 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 self-start sm:self-auto">
+                  گھر کی تکنیکی و قانونی تفصیلات
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {property.features.structure_type && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Building className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Structure & Lenter (تعمیر و لنٹر)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.structure_type}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.registry_status && (
+                  <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/80 shadow-2xs flex items-start gap-3">
+                    <FileCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Legal Registry & Title (رجسٹری و انتقال)</div>
+                      <div className="text-xs sm:text-sm font-bold text-emerald-950 mt-0.5">{property.features.registry_status}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.car_porch && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Car className="w-5 h-5 text-stone-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Car Porch & Parking (کار پورچ)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.car_porch}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.water_source && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Droplets className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Water Supply & Boring (میٹھا پانی بور)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.water_source}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.gas_status && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Flame className="w-5 h-5 text-orange-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Gas Connection (سوئی گیس)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.gas_status}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.electricity && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Zap className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Electricity (واپڈا میٹر)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.electricity}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.flooring && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Layers className="w-5 h-5 text-stone-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Flooring & Finishing (فرش و ماربل)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.flooring}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.street_width && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Navigation className="w-5 h-5 text-stone-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Street Access (گلی کا سائز)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.street_width}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Amenities & Estate Features */}
           <div className="space-y-4">
             <h3 className="font-serif text-2xl text-stone-900 border-b border-stone-100 pb-2">
-              Features & Distinctions
+              Colony Utilities & Features
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {property.amenities.map((amenity: string) => (
@@ -333,7 +439,7 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
                   key={amenity}
                   className="flex items-center gap-2.5 p-3 rounded-xl bg-stone-50 border border-stone-200/80 text-xs font-semibold text-stone-800"
                 >
-                  <Sparkles className="w-4 h-4 text-amber-700 flex-shrink-0" />
+                  <Sparkles className="w-4 h-4 text-emerald-700 flex-shrink-0" />
                   <span>{amenity}</span>
                 </div>
               ))}
@@ -341,42 +447,54 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
           </div>
         </div>
 
-        {/* Right Col: Sticky Concierge & Enquiry Card */}
+        {/* Right Col: Sticky Inquiry Card */}
         <div className="lg:col-span-1 sticky top-28 space-y-6">
-          <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-xl space-y-6">
+          <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-xl space-y-5">
             <div className="border-b border-stone-100 pb-4">
-              <span className="text-[10px] font-mono tracking-widest uppercase text-amber-800 block mb-1">
-                Private Acquisition Representation
+              <span className="text-[10px] font-mono tracking-widest uppercase text-emerald-800 font-bold block mb-1">
+                Sadiqabad Property Desk
               </span>
               <div className="font-serif text-3xl font-bold text-stone-900">{formattedPrice}</div>
+              <span className="text-xs text-stone-500 font-medium mt-1 block">
+                Location: {property.location.locality || property.location.address}, Sadiqabad
+              </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               <button
                 type="button"
                 onClick={() => onOpenEnquiry(property)}
                 className="w-full bg-stone-900 hover:bg-stone-800 text-stone-100 font-bold text-xs py-3.5 px-6 rounded-full shadow-md transition-all cursor-pointer text-center"
               >
-                Request Private Viewing
+                Schedule Family Viewing
               </button>
 
-              <button
-                type="button"
-                onClick={() => onOpenEnquiry(property)}
-                className="w-full bg-stone-50 hover:bg-stone-100 text-stone-800 border border-stone-200 font-semibold text-xs py-3.5 px-6 rounded-full transition-all cursor-pointer text-center"
+              <a
+                href={`https://wa.me/923008671234?text=${encodeURIComponent(`Assalam-o-Alaikum, I am inquiring about "${property.title}" in Sadiqabad.`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 px-6 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 text-center"
               >
-                Request Architectural Dossier
-              </button>
+                <MessageCircle className="w-4 h-4" />
+                <span>Contact via WhatsApp</span>
+              </a>
+
+              <a
+                href="tel:+923008671234"
+                className="w-full bg-stone-50 hover:bg-stone-100 text-stone-800 border border-stone-200 font-semibold text-xs py-3 px-6 rounded-full transition-all flex items-center justify-center gap-2 text-center"
+              >
+                <Phone className="w-3.5 h-3.5 text-stone-600" />
+                <span>Call Agency Agent</span>
+              </a>
             </div>
 
             <div className="pt-2 border-t border-stone-100 space-y-2 text-[11px] text-stone-500 leading-snug">
               <div className="flex items-center gap-2 text-stone-700 font-semibold">
-                <ShieldCheck className="w-4 h-4 text-amber-700 flex-shrink-0" />
-                <span>NDA & Discretion Protocol</span>
+                <ShieldCheck className="w-4 h-4 text-emerald-700 flex-shrink-0" />
+                <span>Verified Sadiqabad Property</span>
               </div>
               <p>
-                All acquisitions and viewings are conducted under strict non-disclosure. Verified financial credentials
-                required prior to on-site access.
+                Registry documents, Fard, and colony layout plan verified before purchase. Direct deal with owner.
               </p>
             </div>
           </div>
@@ -388,14 +506,14 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
         <section className="pt-16 border-t border-stone-200 space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="font-serif text-3xl text-stone-900">
-              Related Notable Residences
+              Similar Sadiqabad Properties
             </h3>
             <button
               type="button"
               onClick={() => onNavigate('/properties')}
-              className="text-xs font-bold text-stone-800 hover:text-amber-800"
+              className="text-xs font-bold text-stone-800 hover:text-emerald-800"
             >
-              View Full Portfolio
+              View Full Sadiqabad Catalogue
             </button>
           </div>
 
