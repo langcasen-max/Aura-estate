@@ -94,11 +94,11 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
       role="dialog"
       aria-modal="true"
       aria-labelledby="enquiry-dialog-title"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/70 backdrop-blur-xs animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/75 backdrop-blur-sm animate-fadeIn"
     >
-      <div className="bg-white rounded-2xl max-w-lg w-full max-h-[92vh] overflow-y-auto border border-stone-200 shadow-2xl flex flex-col">
+      <div className="card-pro animate-fadeInScale bg-white dark:bg-stone-900 rounded-3xl max-w-lg w-full max-h-[92vh] overflow-y-auto border border-stone-200 dark:border-stone-800 shadow-2xl flex flex-col">
         {/* Modal Header */}
-        <div className="px-6 py-5 border-b border-stone-100 flex items-center justify-between sticky top-0 bg-white z-10">
+        <div className="px-6 py-5 border-b border-stone-100 dark:border-stone-800 flex items-center justify-between sticky top-0 bg-white dark:bg-stone-900 z-10">
           <div>
             <span className="text-[10px] tracking-widest uppercase font-mono text-amber-700 block mb-0.5">
               Private Concierge Service
@@ -276,7 +276,7 @@ export const EnquiryModal: React.FC<EnquiryModalProps> = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white font-bold text-xs px-6 py-3 rounded-full shadow-md flex items-center gap-2 cursor-pointer transition-all"
+                  className="btn-pro bg-stone-900 dark:bg-amber-500 hover:bg-stone-800 dark:hover:bg-amber-400 disabled:opacity-50 text-white dark:text-stone-950 font-bold text-xs px-6 py-3 rounded-full shadow-md flex items-center gap-2 cursor-pointer transition-all"
                 >
                   {isSubmitting ? (
                     <>

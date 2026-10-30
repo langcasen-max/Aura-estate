@@ -59,17 +59,17 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
   if (compact) {
     // Hero search variant (for Home page)
     return (
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl p-5 sm:p-6 shadow-2xl border border-stone-200/90 max-w-4xl w-full mx-auto text-left">
+      <div className="card-pro bg-white/95 dark:bg-stone-900/95 backdrop-blur-md rounded-2xl p-5 sm:p-6 shadow-2xl border border-stone-200/90 dark:border-stone-800 max-w-4xl w-full mx-auto text-left">
         {/* Top Segmented Control (Buy / Rent / All) */}
-        <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-200">
-          <div className="inline-flex p-1 bg-stone-100 rounded-lg text-xs font-semibold">
+        <div className="flex items-center justify-between pb-4 mb-4 border-b border-stone-200 dark:border-stone-800">
+          <div className="inline-flex p-1 bg-stone-100 dark:bg-stone-800 rounded-lg text-xs font-semibold">
             <button
               type="button"
               onClick={() => handleStatusChange('all')}
-              className={`px-4 py-1.5 rounded-md transition-all cursor-pointer ${
+              className={`btn-pro px-4 py-1.5 rounded-md cursor-pointer ${
                 filters.listing_status === 'all' || !filters.listing_status
-                  ? 'bg-stone-900 text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-stone-900 text-white dark:bg-amber-500 dark:text-stone-950 shadow-xs font-bold'
+                  : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               All Listings
@@ -77,10 +77,10 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
             <button
               type="button"
               onClick={() => handleStatusChange('for_sale')}
-              className={`px-4 py-1.5 rounded-md transition-all cursor-pointer ${
+              className={`btn-pro px-4 py-1.5 rounded-md cursor-pointer ${
                 filters.listing_status === 'for_sale'
-                  ? 'bg-stone-900 text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-stone-900 text-white dark:bg-amber-500 dark:text-stone-950 shadow-xs font-bold'
+                  : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               For Sale
@@ -88,17 +88,17 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
             <button
               type="button"
               onClick={() => handleStatusChange('for_rent')}
-              className={`px-4 py-1.5 rounded-md transition-all cursor-pointer ${
+              className={`btn-pro px-4 py-1.5 rounded-md cursor-pointer ${
                 filters.listing_status === 'for_rent'
-                  ? 'bg-stone-900 text-white shadow-xs'
-                  : 'text-stone-600 hover:text-stone-900'
+                  ? 'bg-stone-900 text-white dark:bg-amber-500 dark:text-stone-950 shadow-xs font-bold'
+                  : 'text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white'
               }`}
             >
               For Rent
             </button>
           </div>
 
-          <span className="text-[11px] font-mono tracking-wider uppercase text-emerald-800 font-bold hidden sm:inline">
+          <span className="text-[11px] font-mono tracking-wider uppercase text-emerald-800 dark:text-emerald-400 font-bold hidden sm:inline">
             Sadiqabad City Verified
           </span>
         </div>
@@ -107,13 +107,13 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* Sadiqabad Locality */}
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-stone-500 mb-1">
+            <label className="block text-[11px] font-bold tracking-wider uppercase text-stone-500 dark:text-stone-400 mb-1">
               Sadiqabad Area / Colony
             </label>
             <select
               value={filters.locality === 'all' || !filters.locality ? 'all' : filters.locality}
               onChange={handleLocalityChange}
-              className="w-full h-11 px-3 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium text-stone-900 focus:outline-none focus:border-stone-800 cursor-pointer"
+              className="w-full h-11 px-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs font-medium text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-600 transition-all duration-200 cursor-pointer"
             >
               <option value="all">All Sadiqabad Localities</option>
               {SADIQABAD_LOCALITIES.map(loc => (
@@ -126,13 +126,13 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
           {/* Residence Type */}
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-stone-500 mb-1">
+            <label className="block text-[11px] font-bold tracking-wider uppercase text-stone-500 dark:text-stone-400 mb-1">
               Property Type
             </label>
             <select
               value={filters.property_type || 'all'}
               onChange={handleTypeChange}
-              className="w-full h-11 px-3 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium text-stone-900 focus:outline-none focus:border-stone-800 cursor-pointer"
+              className="w-full h-11 px-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs font-medium text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-600 transition-all duration-200 cursor-pointer"
             >
               {PROPERTY_TYPES.map(pt => (
                 <option key={pt.value} value={pt.value}>
@@ -144,7 +144,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
           {/* Keyword Search */}
           <div>
-            <label className="block text-[11px] font-bold tracking-wider uppercase text-stone-500 mb-1">
+            <label className="block text-[11px] font-bold tracking-wider uppercase text-stone-500 dark:text-stone-400 mb-1">
               Keyword / Colony
             </label>
             <div className="relative">
@@ -153,7 +153,7 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
                 placeholder="Model Town, 5 Marla, KLP Road..."
                 value={filters.search || ''}
                 onChange={handleSearchChange}
-                className="w-full h-11 pl-9 pr-3 bg-stone-50 border border-stone-200 rounded-lg text-xs font-medium text-stone-900 focus:outline-none focus:border-stone-800 placeholder-stone-400"
+                className="w-full h-11 pl-9 pr-3 bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-lg text-xs font-medium text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-amber-500/25 focus:border-amber-600 placeholder-stone-400 dark:placeholder-stone-500 transition-all duration-200"
               />
               <Search className="w-4 h-4 text-stone-400 absolute left-3 top-3.5" />
             </div>
@@ -165,8 +165,8 @@ export const SearchFilter: React.FC<SearchFilterProps> = ({
 
   // Full sidebar / page filter variant
   return (
-    <aside aria-label="Listing filters" className="bg-white p-6 rounded-xl border border-stone-200 shadow-xs space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-stone-100">
+    <aside aria-label="Listing filters" className="card-pro bg-white dark:bg-stone-900 p-6 rounded-2xl border border-stone-200 dark:border-stone-800 shadow-xs space-y-6">
+      <div className="flex items-center justify-between pb-4 border-b border-stone-100 dark:border-stone-800">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="w-4 h-4 text-stone-800" />
           <h3 className="font-bold text-sm text-stone-900 uppercase tracking-wider">

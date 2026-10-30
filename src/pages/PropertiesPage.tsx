@@ -298,37 +298,44 @@ export const PropertiesPage: React.FC<PropertiesPageProps> = ({
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className="bg-white rounded-xl aspect-[4/3] p-4 border border-stone-200 animate-pulse" />
+                <div key={i} className="card-pro bg-white dark:bg-stone-800 rounded-2xl aspect-[4/3] p-4 border border-stone-200 dark:border-stone-700 animate-pulse" />
               ))}
             </div>
           ) : paginatedProperties.length === 0 ? (
-            <div className="bg-white p-12 rounded-2xl border border-stone-200 text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
-                <RotateCcw className="w-6 h-6" />
+            <div className="card-pro bg-white dark:bg-stone-900 p-12 rounded-2xl border border-stone-200 dark:border-stone-800 text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center mx-auto text-stone-400">
+                <RotateCcw className="w-6 h-6 animate-spin" style={{ animationDuration: '4s' }} />
               </div>
-              <h3 className="font-serif text-2xl text-stone-900">No matching residences found</h3>
-              <p className="text-xs text-stone-500 max-w-sm mx-auto leading-relaxed">
+              <h3 className="font-serif text-2xl text-stone-900 dark:text-stone-100">No matching residences found</h3>
+              <p className="text-xs text-stone-500 dark:text-stone-400 max-w-sm mx-auto leading-relaxed">
                 We could not locate any properties matching your current filter criteria. Try expanding your search
                 parameters or resetting the filters.
               </p>
               <button
                 type="button"
                 onClick={handleResetFilters}
-                className="bg-stone-900 text-white text-xs font-bold px-6 py-2.5 rounded-full cursor-pointer hover:bg-stone-800"
+                className="btn-pro bg-stone-900 dark:bg-amber-500 text-white dark:text-stone-950 text-xs font-bold px-6 py-2.5 rounded-full cursor-pointer hover:bg-stone-800 dark:hover:bg-amber-400 shadow-md"
               >
                 Reset All Filters
               </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {paginatedProperties.map(property => (
-                <PropertyCard
+              {paginatedProperties.map((property, idx) => (
+                <div
                   key={property.id}
-                  property={property}
-                  isFavorite={isPropertyFavorite(property.id)}
-                  onToggleFavorite={handleToggleFav}
-                  onSelectProperty={slug => onNavigate(`/property/${slug}`)}
-                />
+                  style={{
+                    animation: 'fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both',
+                    animationDelay: `${idx * 60}ms`,
+                  }}
+                >
+                  <PropertyCard
+                    property={property}
+                    isFavorite={isPropertyFavorite(property.id)}
+                    onToggleFavorite={handleToggleFav}
+                    onSelectProperty={slug => onNavigate(`/property/${slug}`)}
+                  />
+                </div>
               ))}
             </div>
           )}

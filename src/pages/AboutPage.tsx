@@ -42,43 +42,43 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenEnquiry 
       </div>
 
       {/* Core Principles */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-        <div className="space-y-3">
-          <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-800">
-            <ShieldCheck className="w-5 h-5 text-amber-800" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="card-pro group bg-white dark:bg-stone-900 p-7 rounded-2xl border border-stone-200 dark:border-stone-800 space-y-3 shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-800 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+            <ShieldCheck className="w-6 h-6" />
           </div>
-          <h3 className="font-serif text-2xl text-stone-900">Uncompromising Discretion</h3>
-          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">
+          <h3 className="font-serif text-2xl text-stone-900 dark:text-stone-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">Uncompromising Discretion</h3>
+          <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed font-light">
             We operate with the confidentiality protocols of a private family office. Every prospective buyer is vetted,
             and sensitive estate documentation is safeguarded under strict NDAs.
           </p>
         </div>
 
-        <div className="space-y-3">
-          <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-800">
-            <Compass className="w-5 h-5 text-amber-800" />
+        <div className="card-pro group bg-white dark:bg-stone-900 p-7 rounded-2xl border border-stone-200 dark:border-stone-800 space-y-3 shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-800 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+            <Compass className="w-6 h-6" />
           </div>
-          <h3 className="font-serif text-2xl text-stone-900">Architectural Integrity</h3>
-          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">
-            We represent homes that possess structural and artistic significance. From mid-century masters to bespoke
-            sustainable modernism, our listings are works of art.
+          <h3 className="font-serif text-2xl text-stone-900 dark:text-stone-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">Architectural Integrity</h3>
+          <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed font-light">
+            We represent homes that possess structural and artistic significance. From solid lenter construction to bespoke
+            modern elevations, our listings are selected for lasting quality.
           </p>
         </div>
 
-        <div className="space-y-3">
-          <div className="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-stone-800">
-            <Award className="w-5 h-5 text-amber-800" />
+        <div className="card-pro group bg-white dark:bg-stone-900 p-7 rounded-2xl border border-stone-200 dark:border-stone-800 space-y-3 shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 flex items-center justify-center text-emerald-800 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-300">
+            <Award className="w-6 h-6" />
           </div>
-          <h3 className="font-serif text-2xl text-stone-900">Principal-Led Advisory</h3>
-          <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-light">
+          <h3 className="font-serif text-2xl text-stone-900 dark:text-stone-100 group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">Principal-Led Advisory</h3>
+          <p className="text-xs sm:text-sm text-stone-600 dark:text-stone-400 leading-relaxed font-light">
             Clients never deal with junior associates. Every transaction, negotiation, and private showing is guided
-            directly by a senior partner with institutional market experience.
+            directly by a senior partner with verified Sadiqabad property experience.
           </p>
         </div>
       </div>
 
       {/* Executive Presence Box */}
-      <div className="bg-stone-900 text-stone-100 rounded-2xl p-10 sm:p-14 border border-stone-800 flex flex-col md:flex-row items-center justify-between gap-8">
+      <div className="card-pro bg-stone-900 text-stone-100 rounded-3xl p-10 sm:p-14 border border-stone-800 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
         <div className="space-y-2 max-w-xl">
           <span className="text-[11px] font-mono tracking-widest uppercase text-emerald-400 font-bold">Sadiqabad Main Office</span>
           <h3 className="font-serif text-3xl sm:text-4xl text-stone-100">
@@ -92,7 +92,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, onOpenEnquiry 
         <button
           type="button"
           onClick={onOpenEnquiry}
-          className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-8 py-4 rounded-full shadow-lg transition-all cursor-pointer flex-shrink-0"
+          className="btn-pro bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-8 py-4 rounded-full shadow-lg transition-all cursor-pointer flex-shrink-0"
         >
           Book Property Visit
         </button>

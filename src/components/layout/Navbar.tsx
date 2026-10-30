@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { siteConfig } from '../../config/site';
+import { getSiteSettings } from '../../services/settingsService';
+import { SiteSettings } from '../../types';
 import { Logo } from '../common/Logo';
 import {
   Heart,
@@ -14,6 +16,7 @@ import {
   ChevronDown,
   Sun,
   Moon,
+  MessageCircle,
 } from 'lucide-react';
 
 interface NavbarProps {
@@ -28,13 +31,28 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings>(getSiteSettings);
+  const [announcementDismissed, setAnnouncementDismissed] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    const handleSettingsChanged = (e: any) => {
+      if (e.detail) {
+        setSiteSettings(e.detail);
+      } else {
+        setSiteSettings(getSiteSettings());
+      }
+    };
+    window.addEventListener('site-settings-changed', handleSettingsChanged);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('site-settings-changed', handleSettingsChanged);
+    };
   }, []);
 
   const handleNavClick = (path: string) => {
@@ -141,6 +159,44 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
         </aside>
       )}
 
+      {/* Top Announcement Banner (Controlled from Admin Settings) */}
+      {siteSettings.show_announcement && siteSettings.top_announcement && !announcementDismissed && (
+        <aside
+          aria-label="Important Announcement"
+          className="bg-gradient-to-r from-amber-900 via-amber-800 to-amber-950 text-amber-100 px-4 py-2 text-xs border-b border-amber-700/60 z-50 relative shadow-xs transition-colors"
+        >
+          <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 font-medium overflow-hidden">
+              <span className="w-2 h-2 rounded-full bg-amber-400 animate-gentlePulse shrink-0" />
+              <span className="truncate">{siteSettings.top_announcement}</span>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              {siteSettings.whatsapp_number && (
+                <a
+                  href={`https://wa.me/${siteSettings.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] transition-colors shadow-2xs"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  <span>WhatsApp Office</span>
+                </a>
+              )}
+              <button
+                type="button"
+                onClick={() => setAnnouncementDismissed(true)}
+                className="text-amber-200 hover:text-white p-1 rounded-full hover:bg-amber-700/50 cursor-pointer transition-colors"
+                title="Dismiss Announcement"
+                aria-label="Dismiss Announcement"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        </aside>
+      )}
+
       {/* Main Navigation Header */}
       <header className={`sticky top-0 z-40 transition-all duration-300 ${headerBgClass}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
@@ -149,63 +205,74 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
             type="button"
             onClick={() => handleNavClick('/')}
             className="text-left cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50 rounded-lg"
-            aria-label={`${siteConfig.agency_name} Home`}
+            aria-label={`${siteSettings.agency_name} Home`}
           >
             <Logo variant="horizontal" size="md" theme={isDark ? 'dark' : 'light'} showTagline={true} />
           </button>
 
-          {/* Desktop Navigation Links */}
+          {/* Desktop Navigation Links with animated underlines */}
           <nav className="hidden md:flex items-center gap-7 text-sm font-medium tracking-wide">
             <button
               type="button"
               onClick={() => handleNavClick('/properties')}
-              className={`transition-colors cursor-pointer ${
+              className={`group relative py-1 cursor-pointer transition-colors ${
                 currentPath === '/properties' ? linkActiveClass : linkBaseClass
               }`}
             >
-              Residences
+              <span>Residences</span>
+              <span className={`block h-[2px] transition-all duration-300 ${
+                currentPath === '/properties' ? 'w-full bg-amber-700 dark:bg-amber-400' : 'w-0 group-hover:w-full bg-amber-600/80 dark:bg-amber-400/80'
+              }`} />
             </button>
             <button
               type="button"
               onClick={() => handleNavClick('/properties?listing_status=for_sale')}
-              className={`${linkBaseClass} transition-colors cursor-pointer`}
+              className={`group relative py-1 ${linkBaseClass} cursor-pointer transition-colors`}
             >
-              Acquire (Buy)
+              <span>Acquire (Buy)</span>
+              <span className="block h-[2px] w-0 group-hover:w-full bg-amber-600/80 dark:bg-amber-400/80 transition-all duration-300" />
             </button>
             <button
               type="button"
               onClick={() => handleNavClick('/properties?listing_status=for_rent')}
-              className={`${linkBaseClass} transition-colors cursor-pointer`}
+              className={`group relative py-1 ${linkBaseClass} cursor-pointer transition-colors`}
             >
-              Lease (Rent)
+              <span>Lease (Rent)</span>
+              <span className="block h-[2px] w-0 group-hover:w-full bg-amber-600/80 dark:bg-amber-400/80 transition-all duration-300" />
             </button>
             <button
               type="button"
               onClick={() => handleNavClick('/about')}
-              className={`transition-colors cursor-pointer ${
+              className={`group relative py-1 cursor-pointer transition-colors ${
                 currentPath === '/about' ? linkActiveClass : linkBaseClass
               }`}
             >
-              The Agency
+              <span>The Agency</span>
+              <span className={`block h-[2px] transition-all duration-300 ${
+                currentPath === '/about' ? 'w-full bg-amber-700 dark:bg-amber-400' : 'w-0 group-hover:w-full bg-amber-600/80 dark:bg-amber-400/80'
+              }`} />
             </button>
             <button
               type="button"
               onClick={() => handleNavClick('/contact')}
-              className={`transition-colors cursor-pointer ${
+              className={`group relative py-1 cursor-pointer transition-colors ${
                 currentPath === '/contact' ? linkActiveClass : linkBaseClass
               }`}
             >
-              Concierge
+              <span>Concierge</span>
+              <span className={`block h-[2px] transition-all duration-300 ${
+                currentPath === '/contact' ? 'w-full bg-amber-700 dark:bg-amber-400' : 'w-0 group-hover:w-full bg-amber-600/80 dark:bg-amber-400/80'
+              }`} />
             </button>
           </nav>
 
           {/* Right Action Zone (Theme Toggle, Favourites & User Menu) */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Theme Toggle Button (Light Mode / Dark Mode) */}
+            {/* Theme Toggle Button (Light Mode / Dark Mode) with smooth rotation */}
             <button
               type="button"
               onClick={toggleTheme}
-              className={`p-2 rounded-full transition-all cursor-pointer flex items-center justify-center ${
+              className={`btn-pro p-2 rounded-full cursor-pointer flex items-center justify-center transition-all ${
                 isDark
                   ? 'text-amber-300 hover:text-white hover:bg-stone-800'
                   : 'text-stone-700 hover:text-amber-900 hover:bg-amber-100/60 border border-amber-900/15'
@@ -213,14 +280,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
               title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               aria-label={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
-              {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              <div className="transition-transform duration-500 hover:rotate-90">
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </div>
             </button>
 
-            {/* Favourites Button */}
+            {/* Favourites Button with tactile bounce */}
             <button
               type="button"
               onClick={() => handleNavClick(isAuthenticated ? '/dashboard' : '/properties?filter=saved')}
-              className={`relative p-2 transition-colors cursor-pointer rounded-full ${
+              className={`btn-pro relative p-2 cursor-pointer rounded-full transition-colors ${
                 isDark
                   ? 'text-stone-300 hover:text-white hover:bg-white/10'
                   : 'text-stone-700 hover:text-stone-950 hover:bg-stone-200/50'
@@ -228,9 +297,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
               title="Saved Residences"
               aria-label={`Saved residences (${favoritesCount})`}
             >
-              <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${favoritesCount > 0 ? 'fill-amber-500 text-amber-500' : ''}`} />
+              <Heart className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 active:scale-125 ${favoritesCount > 0 ? 'fill-amber-500 text-amber-500' : ''}`} />
               {favoritesCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-amber-500 text-stone-950 font-bold text-[10px] flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-amber-500 text-stone-950 font-bold text-[10px] flex items-center justify-center animate-fadeInScale">
                   {favoritesCount}
                 </span>
               )}
@@ -242,7 +311,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, favorit
                 <button
                   type="button"
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className={`flex items-center gap-2 py-1.5 px-3 rounded-full border text-xs font-medium cursor-pointer transition-colors ${
+                  className={`btn-pro flex items-center gap-2 py-1.5 px-3 rounded-full border text-xs font-medium cursor-pointer transition-colors ${
                     isDark
                       ? 'border-stone-700 bg-stone-800/80 hover:bg-stone-800 text-stone-200'
                       : 'border-stone-300 bg-white hover:bg-stone-50 text-stone-800 shadow-2xs'

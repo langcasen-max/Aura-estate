@@ -305,17 +305,33 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">Accommodations</div>
+              <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">
+                {property.property_type === 'estate' ? 'Property Category' : 'Accommodations'}
+              </div>
               <div className="text-base sm:text-lg font-bold text-stone-800 flex items-center gap-1.5">
                 <Bed className="w-4 h-4 text-stone-400" />
-                <span>{property.bedrooms > 0 ? `${property.bedrooms} Beds • ${property.bathrooms} Baths` : 'Commercial Unit'}</span>
+                <span>
+                  {property.property_type === 'estate'
+                    ? property.features?.plot_dimensions
+                      ? `Plot (${property.features.plot_dimensions})`
+                      : 'Residential Plot'
+                    : property.bedrooms > 0
+                    ? `${property.bedrooms} Beds • ${property.bathrooms} Baths`
+                    : 'Commercial Unit'}
+                </span>
               </div>
             </div>
             <div>
-              <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">Year Built</div>
+              <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider mb-1">
+                {property.property_type === 'estate' ? 'Possession Status' : 'Year Built'}
+              </div>
               <div className="text-base sm:text-lg font-bold text-stone-800 flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-stone-400" />
-                <span>{property.year_built || 'Newly Built'}</span>
+                <span>
+                  {property.property_type === 'estate'
+                    ? property.features?.possession_status || 'Immediate Possession'
+                    : property.year_built || 'Newly Built'}
+                </span>
               </div>
             </div>
           </div>
@@ -332,8 +348,182 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
             </div>
           </div>
 
-          {/* Structured House Specifications Box (گھر کی تفصیلی اور تکنیکی معلومات) */}
-          {property.features && (
+          {/* DYNAMIC SPECIFICATIONS ACCORDING TO PROPERTY TYPE */}
+
+          {/* 1. PLOT SPECIFICATIONS (پلاٹ کی تفصیلی اور قانونی معلومات) */}
+          {property.property_type === 'estate' && property.features && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-2">
+                <h3 className="font-serif text-2xl text-stone-900">
+                  Plot Specifications & Legal Details
+                </h3>
+                <span className="text-xs font-semibold text-emerald-900 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 self-start sm:self-auto">
+                  پلاٹ کی تفصیلی و قانونی معلومات
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {property.features.plot_dimensions && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Maximize2 className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Plot Dimensions (پلاٹ کی پیمائش)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.plot_dimensions}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.possession_status && (
+                  <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/80 shadow-2xs flex items-start gap-3">
+                    <FileCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Possession Status (قبضہ کی صورتحال)</div>
+                      <div className="text-xs sm:text-sm font-bold text-emerald-950 mt-0.5">{property.features.possession_status}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.is_corner && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Navigation className="w-5 h-5 text-stone-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Corner Plot Status (کارنر پلاٹ)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.is_corner}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.is_park_facing && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Sparkles className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Park Facing (پارک فیسنگ)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.is_park_facing}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.boundary_wall && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Building className="w-5 h-5 text-stone-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Boundary Wall & Gate (چار دیواری)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.boundary_wall}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.street_width && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Navigation className="w-5 h-5 text-stone-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Street / Road Access (روڈ اور گلی کی چوڑائی)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.street_width}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.registry_status && (
+                  <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/80 shadow-2xs flex items-start gap-3">
+                    <FileCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Legal Registry & Title (رجسٹری و انتقال)</div>
+                      <div className="text-xs sm:text-sm font-bold text-emerald-950 mt-0.5">{property.features.registry_status}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.water_source && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Droplets className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Colony Utilities (گیس، پانی، بجلی کی سہولیات)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.water_source}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 2. COMMERCIAL SPECIFICATIONS (کمرشل تفاصیل) */}
+          {property.property_type === 'commercial' && property.features && (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-2">
+                <h3 className="font-serif text-2xl text-stone-900">
+                  Commercial Plaza & Shop Details
+                </h3>
+                <span className="text-xs font-semibold text-amber-900 bg-amber-50 px-3 py-1 rounded-full border border-amber-200 self-start sm:self-auto">
+                  کمرشل تفاصیل و کاروباری تفصیلات
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                {property.features.commercial_frontage && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Maximize2 className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Frontage Width (فرنٹ چوڑائی)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.commercial_frontage}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.rental_income && (
+                  <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/80 shadow-2xs flex items-start gap-3">
+                    <Zap className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Monthly Rental Income (ماہانہ کرایہ)</div>
+                      <div className="text-xs sm:text-sm font-bold text-emerald-950 mt-0.5">{property.features.rental_income}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.structure_type && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Building className="w-5 h-5 text-stone-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Structure & Floors (منزلیں اور شٹرز)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.structure_type}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.street_width && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Navigation className="w-5 h-5 text-stone-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Road & Boulevard (روڈ کا سائز)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.street_width}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.registry_status && (
+                  <div className="p-4 rounded-xl bg-emerald-50/50 border border-emerald-200/80 shadow-2xs flex items-start gap-3">
+                    <FileCheck className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-emerald-800 uppercase tracking-wider">Registry & Approvals (رجسٹری و منظوری)</div>
+                      <div className="text-xs sm:text-sm font-bold text-emerald-950 mt-0.5">{property.features.registry_status}</div>
+                    </div>
+                  </div>
+                )}
+
+                {property.features.electricity && (
+                  <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-2xs flex items-start gap-3">
+                    <Zap className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <div className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">Commercial Electricity (بجلی میٹر)</div>
+                      <div className="text-xs sm:text-sm font-bold text-stone-900 mt-0.5">{property.features.electricity}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* 3. RESIDENTIAL HOUSE SPECIFICATIONS (گھر کی تفصیلی اور تکنیکی معلومات) */}
+          {property.property_type !== 'estate' && property.property_type !== 'commercial' && property.features && (
             <div className="space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-2">
                 <h3 className="font-serif text-2xl text-stone-900">
@@ -449,13 +639,13 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
 
         {/* Right Col: Sticky Inquiry Card */}
         <div className="lg:col-span-1 sticky top-28 space-y-6">
-          <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-xl space-y-5">
-            <div className="border-b border-stone-100 pb-4">
-              <span className="text-[10px] font-mono tracking-widest uppercase text-emerald-800 font-bold block mb-1">
+          <div className="card-pro bg-white dark:bg-stone-900 p-6 rounded-3xl border border-stone-200 dark:border-stone-800 shadow-xl space-y-5">
+            <div className="border-b border-stone-100 dark:border-stone-800 pb-4">
+              <span className="text-[10px] font-mono tracking-widest uppercase text-emerald-800 dark:text-emerald-400 font-bold block mb-1">
                 Sadiqabad Property Desk
               </span>
-              <div className="font-serif text-3xl font-bold text-stone-900">{formattedPrice}</div>
-              <span className="text-xs text-stone-500 font-medium mt-1 block">
+              <div className="font-serif text-3xl font-bold text-stone-900 dark:text-stone-50">{formattedPrice}</div>
+              <span className="text-xs text-stone-500 dark:text-stone-400 font-medium mt-1 block">
                 Location: {property.location.locality || property.location.address}, Sadiqabad
               </span>
             </div>
@@ -464,7 +654,7 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenEnquiry(property)}
-                className="w-full bg-stone-900 hover:bg-stone-800 text-stone-100 font-bold text-xs py-3.5 px-6 rounded-full shadow-md transition-all cursor-pointer text-center"
+                className="btn-pro w-full bg-stone-900 dark:bg-amber-500 hover:bg-stone-800 dark:hover:bg-amber-400 text-stone-100 dark:text-stone-950 font-bold text-xs py-3.5 px-6 rounded-full shadow-md transition-all cursor-pointer text-center"
               >
                 Schedule Family Viewing
               </button>
@@ -473,7 +663,7 @@ export const PropertyDetailPage: React.FC<PropertyDetailPageProps> = ({
                 href={`https://wa.me/923008671234?text=${encodeURIComponent(`Assalam-o-Alaikum, I am inquiring about "${property.title}" in Sadiqabad.`)}`}
                 target="_blank"
                 rel="noreferrer"
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 px-6 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 text-center"
+                className="btn-pro w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs py-3 px-6 rounded-full shadow-xs transition-all flex items-center justify-center gap-2 text-center"
               >
                 <MessageCircle className="w-4 h-4" />
                 <span>Contact via WhatsApp</span>

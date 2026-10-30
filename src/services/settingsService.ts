@@ -10,7 +10,7 @@ export function getSiteSettings(): SiteSettings {
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(siteConfig));
       return siteConfig;
     }
-    const parsed = JSON.parse(raw);
+    const parsed = { ...siteConfig, ...JSON.parse(raw) };
     if (parsed.email === 'langcasen@gmail.com') {
       parsed.email = siteConfig.email;
       localStorage.setItem(SETTINGS_KEY, JSON.stringify(parsed));
@@ -29,6 +29,9 @@ export function updateSiteSettings(settings: Partial<SiteSettings>): SiteSetting
   };
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(updated));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('site-settings-changed', { detail: updated }));
+    }
   } catch (err) {
     console.error('Failed to save settings:', err);
   }
@@ -38,6 +41,9 @@ export function updateSiteSettings(settings: Partial<SiteSettings>): SiteSetting
 export function resetDefaultSettings(): SiteSettings {
   try {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(siteConfig));
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('site-settings-changed', { detail: siteConfig }));
+    }
   } catch (err) {
     console.error('Failed to reset settings:', err);
   }

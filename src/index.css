@@ -1,34 +1,196 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     color: #1c1917; /* stone-900 */
     background-color: #fafaf9; /* stone-50 */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1, h2, h3, .font-serif, .font-display {
-    font-family: 'Instrument Serif', Georgia, serif;
-    letter-spacing: -0.015em;
+    font-family: 'Playfair Display', 'Instrument Serif', Georgia, serif;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
   }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+/* ==========================================================================
+   Luxury Animation Keyframes & Motion Budgets
+   ========================================================================== */
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+@keyframes fadeInDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes softFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes subtleShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes gentlePulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+/* ==========================================================================
+   Utility Classes for Professional Boxes & Typography
+   ========================================================================== */
+
+/* Animation Utilities */
 .animate-fadeIn {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-fadeInUp {
-  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fadeInDown {
+  animation: fadeInDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fadeInScale {
+  animation: fadeInScale 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-softFloat {
+  animation: softFloat 4s ease-in-out infinite;
+}
+
+.animate-gentlePulse {
+  animation: gentlePulse 3s ease-in-out infinite;
+}
+
+/* Stagger Delays for Cascade Animations */
+.stagger-1 { animation-delay: 60ms; }
+.stagger-2 { animation-delay: 120ms; }
+.stagger-3 { animation-delay: 180ms; }
+.stagger-4 { animation-delay: 240ms; }
+.stagger-5 { animation-delay: 300ms; }
+.stagger-6 { animation-delay: 360ms; }
+
+/* Professional Card Elevating Every Box */
+.card-pro {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.25s ease,
+              background-color 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-pro:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 32px -10px rgba(28, 25, 23, 0.12),
+              0 8px 16px -6px rgba(28, 25, 23, 0.06);
+}
+
+.dark .card-pro:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 36px -10px rgba(0, 0, 0, 0.7),
+              0 0 20px 2px rgba(217, 119, 6, 0.08);
+}
+
+/* Professional Interactive Button */
+.btn-pro {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.2s ease,
+              color 0.2s ease,
+              border-color 0.2s ease;
+  will-change: transform;
+}
+
+.btn-pro:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 16px -4px rgba(28, 25, 23, 0.18);
+}
+
+.btn-pro:active {
+  transform: translateY(0.5px) scale(0.98);
+}
+
+/* Luxury Shimmer Effect for Hero Badges / Highlights */
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #78350f 0%,
+    #b45309 25%,
+    #d97706 50%,
+    #b45309 75%,
+    #78350f 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: subtleShimmer 6s linear infinite;
+}
+
+.dark .shimmer-text {
+  background: linear-gradient(
+    90deg,
+    #fef3c7 0%,
+    #fcd34d 25%,
+    #f59e0b 50%,
+    #fcd34d 75%,
+    #fef3c7 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: subtleShimmer 6s linear infinite;
 }
 
 /* Subtle luxury scrollbar */
@@ -41,11 +203,32 @@
   background: #f5f5f4;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #1c1917;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #d6d3d1;
   border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #44403c;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a29e;
+  background: #b45309;
+}
+
+/* Reduced motion accessibility compliance */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

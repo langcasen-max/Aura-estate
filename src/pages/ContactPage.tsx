@@ -66,76 +66,76 @@ export const ContactPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         {/* Left Col: Contact Information */}
         <div className="space-y-8">
-          <div className="bg-white p-8 rounded-2xl border border-stone-200/90 shadow-xs space-y-6">
-            <h3 className="font-serif text-2xl text-stone-900 border-b border-stone-100 pb-3">
-              Flagship Salon
+          <div className="card-pro bg-white dark:bg-stone-900 p-8 rounded-3xl border border-stone-200/90 dark:border-stone-800 shadow-xs space-y-6">
+            <h3 className="font-serif text-2xl text-stone-900 dark:text-stone-100 border-b border-stone-100 dark:border-stone-800 pb-3">
+              Sadiqabad Main Office
             </h3>
 
-            <div className="space-y-4 text-xs text-stone-700">
+            <div className="space-y-4 text-xs text-stone-700 dark:text-stone-300">
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-amber-800 flex-shrink-0 mt-0.5" />
+                <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block text-stone-900 text-sm">Beverly Hills Salon</strong>
-                  <span>{siteConfig.address}</span>
+                  <strong className="block text-stone-900 dark:text-stone-100 text-sm">Main KLP Road Office</strong>
+                  <span className="leading-relaxed">{siteConfig.address}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-amber-800 flex-shrink-0" />
+                <Phone className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 <div>
-                  <strong className="block text-stone-900">Direct Concierge Telephone</strong>
-                  <a href={`tel:${siteConfig.phone}`} className="hover:text-amber-800 font-mono">
+                  <strong className="block text-stone-900 dark:text-stone-100">Direct Office Telephone & WhatsApp</strong>
+                  <a href={`tel:${siteConfig.phone}`} className="hover:text-amber-800 dark:hover:text-amber-400 font-mono">
                     {siteConfig.phone}
                   </a>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-amber-800 flex-shrink-0" />
+                <Mail className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
                 <div>
-                  <strong className="block text-stone-900">Confidential Correspondence</strong>
-                  <a href={`mailto:${siteConfig.email}`} className="hover:text-amber-800 font-mono">
+                  <strong className="block text-stone-900 dark:text-stone-100">Official Correspondence</strong>
+                  <a href={`mailto:${siteConfig.email}`} className="hover:text-amber-800 dark:hover:text-amber-400 font-mono">
                     {siteConfig.email}
                   </a>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-amber-800 flex-shrink-0 mt-0.5" />
+                <Clock className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                 <div>
-                  <strong className="block text-stone-900">Salon Hours</strong>
+                  <strong className="block text-stone-900 dark:text-stone-100">Office Timings</strong>
                   <span>{siteConfig.hours}</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-stone-100 flex items-center gap-2 text-xs text-stone-500">
-              <ShieldCheck className="w-4 h-4 text-amber-700 flex-shrink-0" />
-              <span>Registered Brokerage License #CA-02941049</span>
+            <div className="pt-4 border-t border-stone-100 dark:border-stone-800 flex items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>Verified Sadiqabad Property Network</span>
             </div>
           </div>
         </div>
 
         {/* Right Col: Direct Inquiry Form */}
-        <div className="bg-white p-8 rounded-2xl border border-stone-200/90 shadow-xl space-y-6">
-          <h3 className="font-serif text-2xl text-stone-900 border-b border-stone-100 pb-3">
+        <div className="card-pro bg-white dark:bg-stone-900 p-8 rounded-3xl border border-stone-200/90 dark:border-stone-800 shadow-xl space-y-6">
+          <h3 className="font-serif text-2xl text-stone-900 dark:text-stone-100 border-b border-stone-100 dark:border-stone-800 pb-3">
             Direct Transmission
           </h3>
 
           {success ? (
             <div className="py-8 text-center space-y-4 animate-fadeIn">
-              <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center mx-auto">
+              <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
-              <h4 className="font-serif text-2xl text-stone-900">Message Delivered</h4>
-              <p className="text-xs text-stone-600 leading-relaxed max-w-sm mx-auto">
-                Your enquiry has been transmitted directly to our managing director. We will be in touch with complete
+              <h4 className="font-serif text-2xl text-stone-900 dark:text-stone-100">Message Delivered</h4>
+              <p className="text-xs text-stone-600 dark:text-stone-400 leading-relaxed max-w-sm mx-auto">
+                Your enquiry has been transmitted directly to our Sadiqabad property consultant. We will be in touch with complete
                 discretion.
               </p>
               <button
                 type="button"
                 onClick={() => setSuccess(false)}
-                className="text-xs text-stone-900 font-bold hover:underline"
+                className="btn-pro text-xs text-stone-900 dark:text-stone-100 font-bold hover:underline"
               >
                 Send Another Inquiry
               </button>
@@ -224,7 +224,7 @@ export const ContactPage: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white font-bold text-xs py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="btn-pro w-full bg-stone-900 dark:bg-amber-500 hover:bg-stone-800 dark:hover:bg-amber-400 disabled:opacity-50 text-white dark:text-stone-950 font-bold text-xs py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 {isSubmitting ? (
                   <>

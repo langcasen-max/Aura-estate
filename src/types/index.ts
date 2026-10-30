@@ -49,6 +49,15 @@ export interface PropertyFeatures {
   electricity?: string;
   flooring?: string;
   street_width?: string;
+  plot_dimensions?: string;
+  possession_status?: string;
+  is_corner?: string;
+  is_park_facing?: string;
+  boundary_wall?: string;
+  plot_number?: string;
+  block_sector?: string;
+  commercial_frontage?: string;
+  rental_income?: string;
 }
 
 export interface Property {
@@ -131,4 +140,13 @@ export interface SiteSettings {
   commission_rate: number;
   currency_symbol?: string;
   currency_code?: string;
+  hero_badge?: string;
+  hero_title?: string;
+  hero_subtitle?: string;
+  top_announcement?: string;
+  show_announcement?: boolean;
+  whatsapp_number?: string;
+  stats_satisfied_clients?: string;
+  stats_properties_sold?: string;
+  stats_years_experience?: string;
 }

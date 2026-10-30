@@ -240,6 +240,7 @@ export async function createProperty(data: Partial<Property>): Promise<Property>
         display_order: 0,
       },
     ],
+    features: data.features || {},
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };
@@ -260,6 +261,8 @@ export async function updateProperty(id: string, updates: Partial<Property>): Pr
   const updated: Property = {
     ...existing,
     ...updates,
+    location: updates.location ? { ...existing.location, ...updates.location } : existing.location,
+    features: updates.features ? { ...(existing.features || {}), ...updates.features } : existing.features,
     updated_at: new Date().toISOString(),
   };
 

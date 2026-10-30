@@ -90,6 +90,8 @@ const LUXURY_AMENITY_OPTIONS = SADIQABAD_AMENITIES;
 const PRESET_IMAGE_GALLERY = [
   { label: 'Model Town 10 Marla Luxury Double-Story House', url: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80' },
   { label: 'Allama Iqbal Town 5 Marla Modern Elevation', url: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Prime Residential Plot - Boundary Wall & Carpeted Road', url: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80' },
+  { label: 'Demarcated Corner Plot Fronting 40ft Main Boulevard', url: 'https://images.unsplash.com/photo-1628744448840-55bdb2497bd4?auto=format&fit=crop&w=1600&q=80' },
   { label: 'Spanish Style Corner Villa Frontage', url: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80' },
   { label: 'Satellite Town Double Story House', url: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=1600&q=80' },
   { label: 'Main KLP Road Commercial Plaza Front', url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1600&q=80' },
@@ -1417,89 +1419,223 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
               onSubmit={e => {
                 e.preventDefault();
                 updateSiteSettings(siteSettings);
-                showNotification('success', 'Agency configuration saved.');
+                showNotification('success', 'Agency configuration & website settings saved successfully.');
               }}
-              className="space-y-4 text-xs"
+              className="space-y-6 text-xs"
             >
-              <div>
-                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Agency Name</label>
-                <input
-                  type="text"
-                  required
-                  value={siteSettings.agency_name}
-                  onChange={e => setSiteSettings({ ...siteSettings, agency_name: e.target.value })}
-                  className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                />
-              </div>
+              {/* Core Identity */}
+              <div className="space-y-4">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-stone-800 border-b border-stone-100 pb-2 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-amber-700" />
+                  <span>1. Agency Identity & Contact</span>
+                </h4>
 
-              <div>
-                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Flagship Office Address</label>
-                <input
-                  type="text"
-                  required
-                  value={siteSettings.address}
-                  onChange={e => setSiteSettings({ ...siteSettings, address: e.target.value })}
-                  className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Concierge Telephone</label>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Agency Name</label>
                   <input
                     type="text"
                     required
-                    value={siteSettings.phone}
-                    onChange={e => setSiteSettings({ ...siteSettings, phone: e.target.value })}
-                    className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-mono"
+                    value={siteSettings.agency_name}
+                    onChange={e => setSiteSettings({ ...siteSettings, agency_name: e.target.value })}
+                    className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Concierge Email</label>
-                  <input
-                    type="email"
-                    required
-                    value={siteSettings.email}
-                    onChange={e => setSiteSettings({ ...siteSettings, email: e.target.value })}
-                    className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Standard Commission Rate</label>
-                  <input
-                    type="number"
-                    step="0.001"
-                    min="0.005"
-                    max="0.10"
-                    required
-                    value={siteSettings.commission_rate}
-                    onChange={e => setSiteSettings({ ...siteSettings, commission_rate: parseFloat(e.target.value) || 0.025 })}
-                    className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-mono"
-                  />
-                  <span className="text-[10px] text-stone-400 mt-1 block">e.g. 0.025 = 2.5%</span>
-                </div>
-
-                <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Operating Hours</label>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Flagship Office Address</label>
                   <input
                     type="text"
-                    value={siteSettings.hours || 'Mon–Sat: 09:00 – 20:00 PST'}
-                    onChange={e => setSiteSettings({ ...siteSettings, hours: e.target.value })}
+                    required
+                    value={siteSettings.address}
+                    onChange={e => setSiteSettings({ ...siteSettings, address: e.target.value })}
                     className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
                   />
                 </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Telephone / Hotline</label>
+                    <input
+                      type="text"
+                      required
+                      value={siteSettings.phone}
+                      onChange={e => setSiteSettings({ ...siteSettings, phone: e.target.value })}
+                      className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-mono"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Official WhatsApp Number</label>
+                    <input
+                      type="text"
+                      placeholder="+92 300 8671234"
+                      value={siteSettings.whatsapp_number || '+92 300 8671234'}
+                      onChange={e => setSiteSettings({ ...siteSettings, whatsapp_number: e.target.value })}
+                      className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-mono"
+                    />
+                    <span className="text-[10px] text-stone-400 mt-1 block">Used for direct WhatsApp chat buttons</span>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Concierge Email</label>
+                    <input
+                      type="email"
+                      required
+                      value={siteSettings.email}
+                      onChange={e => setSiteSettings({ ...siteSettings, email: e.target.value })}
+                      className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Standard Commission Rate</label>
+                    <input
+                      type="number"
+                      step="0.001"
+                      min="0.005"
+                      max="0.10"
+                      required
+                      value={siteSettings.commission_rate}
+                      onChange={e => setSiteSettings({ ...siteSettings, commission_rate: parseFloat(e.target.value) || 0.01 })}
+                      className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-mono"
+                    />
+                    <span className="text-[10px] text-stone-400 mt-1 block">0.01 = 1% standard local agency fee</span>
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Operating Hours</label>
+                    <input
+                      type="text"
+                      value={siteSettings.hours || 'Monday – Saturday: 9:00 AM – 8:00 PM PKT'}
+                      onChange={e => setSiteSettings({ ...siteSettings, hours: e.target.value })}
+                      className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="pt-3 border-t border-stone-100 flex justify-end">
+              {/* Homepage Hero & Branding Content */}
+              <div className="space-y-4 pt-4 border-t border-stone-100">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-stone-800 border-b border-stone-100 pb-2 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  <span>2. Website Homepage Hero Section Content</span>
+                </h4>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Hero Top Badge Text</label>
+                  <input
+                    type="text"
+                    value={siteSettings.hero_badge || 'Dedicated Exclusively to Sadiqabad City'}
+                    onChange={e => setSiteSettings({ ...siteSettings, hero_badge: e.target.value })}
+                    className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                  />
+                  <span className="text-[10px] text-stone-400 mt-1 block">Small pill badge at top of homepage hero</span>
+                </div>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Hero Main Headline / Title</label>
+                  <input
+                    type="text"
+                    required
+                    value={siteSettings.hero_title || 'Find Your Dream Home & Plot in Sadiqabad'}
+                    onChange={e => setSiteSettings({ ...siteSettings, hero_title: e.target.value })}
+                    className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-serif font-bold text-base"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Hero Subtitle / Description</label>
+                  <textarea
+                    rows={3}
+                    value={siteSettings.hero_subtitle || ''}
+                    onChange={e => setSiteSettings({ ...siteSettings, hero_subtitle: e.target.value })}
+                    className="w-full p-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 leading-relaxed"
+                  />
+                </div>
+              </div>
+
+              {/* Announcement Banner */}
+              <div className="space-y-4 pt-4 border-t border-stone-100">
+                <div className="flex items-center justify-between border-b border-stone-100 pb-2">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-stone-800 flex items-center gap-2">
+                    <Star className="w-4 h-4 text-amber-500" />
+                    <span>3. Website Top Announcement Bar (Header Banner)</span>
+                  </h4>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={siteSettings.show_announcement ?? true}
+                      onChange={e => setSiteSettings({ ...siteSettings, show_announcement: e.target.checked })}
+                      className="w-4 h-4 accent-amber-600 cursor-pointer"
+                    />
+                    <span className="font-bold text-xs text-stone-700">Show Banner on Website</span>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Announcement Message Text</label>
+                  <input
+                    type="text"
+                    value={siteSettings.top_announcement || ''}
+                    onChange={e => setSiteSettings({ ...siteSettings, top_announcement: e.target.value })}
+                    placeholder="🌟 Direct Owner Deals: Prime 5 & 10 Marla Plots Available in Model Town & Satellite Town Sadiqabad!"
+                    className="w-full h-11 px-3.5 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                  />
+                  <span className="text-[10px] text-stone-400 mt-1 block">Displayed at the very top of all pages when enabled</span>
+                </div>
+              </div>
+
+              {/* Homepage Stats Counters */}
+              <div className="space-y-4 pt-4 border-t border-stone-100">
+                <h4 className="font-bold text-xs uppercase tracking-wider text-stone-800 border-b border-stone-100 pb-2 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-blue-600" />
+                  <span>4. Homepage Trust Statistics (Counters)</span>
+                </h4>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Satisfied Clients</label>
+                    <input
+                      type="text"
+                      value={siteSettings.stats_satisfied_clients || '1,200+'}
+                      onChange={e => setSiteSettings({ ...siteSettings, stats_satisfied_clients: e.target.value })}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Properties Sold / Leased</label>
+                    <input
+                      type="text"
+                      value={siteSettings.stats_properties_sold || '450+'}
+                      onChange={e => setSiteSettings({ ...siteSettings, stats_properties_sold: e.target.value })}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-bold"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Years of Local Experience</label>
+                    <input
+                      type="text"
+                      value={siteSettings.stats_years_experience || '15+'}
+                      onChange={e => setSiteSettings({ ...siteSettings, stats_years_experience: e.target.value })}
+                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-stone-100 flex items-center justify-between">
+                <span className="text-[11px] text-stone-500">
+                  Any changes saved here will immediately update across the live website.
+                </span>
                 <button
                   type="submit"
-                  className="bg-stone-900 text-white font-bold text-xs px-6 py-2.5 rounded-full cursor-pointer hover:bg-stone-800"
+                  className="bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs px-7 py-3 rounded-full cursor-pointer shadow-md transition-all"
                 >
-                  Save Agency Details
+                  Save All Website Settings
                 </button>
               </div>
             </form>
@@ -1840,6 +1976,38 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
   const [flooring, setFlooring] = useState(property?.features?.flooring || 'Full Marble & Bath Tiles');
   const [streetWidth, setStreetWidth] = useState(property?.features?.street_width || '30ft Wide Paved Street');
 
+  // Plot Specific Features (پلاٹ کی تفصیلی معلومات)
+  const [plotDimensions, setPlotDimensions] = useState(property?.features?.plot_dimensions || '25 x 45');
+  const [possessionStatus, setPossessionStatus] = useState(property?.features?.possession_status || 'Immediate Possession (فوری قبضہ)');
+  const [isCorner, setIsCorner] = useState(property?.features?.is_corner || 'No (Standard Plot)');
+  const [isParkFacing, setIsParkFacing] = useState(property?.features?.is_park_facing || 'No');
+  const [boundaryWall, setBoundaryWall] = useState(property?.features?.boundary_wall || 'Complete Boundary Wall with Iron Gate');
+  const [plotNumber, setPlotNumber] = useState(property?.features?.plot_number || '');
+  const [blockSector, setBlockSector] = useState(property?.features?.block_sector || '');
+
+  // Commercial Specific Features (کمرشل تفاصیل)
+  const [commercialFrontage, setCommercialFrontage] = useState(property?.features?.commercial_frontage || '30 Feet Frontage');
+  const [rentalIncome, setRentalIncome] = useState(property?.features?.rental_income || '');
+
+  const handlePropertyTypeSelect = (newType: PropertyType) => {
+    setPropertyType(newType);
+    if (newType === 'estate') {
+      if (bedrooms > 0) setBedrooms(0);
+      if (bathrooms > 0) setBathrooms(0);
+    } else if (newType === 'commercial') {
+      if (bedrooms > 0) setBedrooms(0);
+    } else {
+      if (bedrooms === 0) setBedrooms(3);
+      if (bathrooms === 0) setBathrooms(3);
+    }
+  };
+
+  const handleSelectPlotPreset = (m: number, s: number, dims: string) => {
+    setAreaMarla(m);
+    setAreaSqft(s);
+    setPlotDimensions(dims);
+  };
+
   // Location
   const [address, setAddress] = useState(property?.location.address || 'Street 5, Sector B');
   const [locality, setLocality] = useState(property?.location.locality || 'Satellite Town');
@@ -2004,6 +2172,15 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
         electricity: electricity,
         flooring: flooring,
         street_width: streetWidth,
+        plot_dimensions: plotDimensions,
+        possession_status: possessionStatus,
+        is_corner: isCorner,
+        is_park_facing: isParkFacing,
+        boundary_wall: boundaryWall,
+        plot_number: plotNumber,
+        block_sector: blockSector,
+        commercial_frontage: commercialFrontage,
+        rental_income: rentalIncome,
       },
       amenities: selectedAmenities,
       media: mediaList,
@@ -2146,7 +2323,7 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                   <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Property Type</label>
                   <select
                     value={propertyType}
-                    onChange={e => setPropertyType(e.target.value as PropertyType)}
+                    onChange={e => handlePropertyTypeSelect(e.target.value as PropertyType)}
                     className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
                   >
                     <option value="villa">Independent House / Villa</option>
@@ -2200,27 +2377,24 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
 
           {/* SECTION 2: SPECS */}
           {modalTab === 'specs' && (
-            <div className="space-y-5 animate-fadeIn">
+            <div className="space-y-6 animate-fadeIn">
               {/* Quick Marla Sizing Helpers */}
               <div>
                 <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1.5">
-                  Quick Plot Size Selector
+                  Quick Size Selector (ایک کلک سائز منتخب کریں)
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {[
-                    { label: '3 Marla', marla: 3, sqft: 675 },
-                    { label: '5 Marla', marla: 5, sqft: 1125 },
-                    { label: '7 Marla', marla: 7, sqft: 1575 },
-                    { label: '10 Marla', marla: 10, sqft: 2250 },
-                    { label: '1 Kanal (20 Marla)', marla: 20, sqft: 4500 },
+                    { label: '3 Marla (20×34)', marla: 3, sqft: 675, dims: '20 x 34' },
+                    { label: '5 Marla (25×45)', marla: 5, sqft: 1125, dims: '25 x 45' },
+                    { label: '7 Marla (30×52.5)', marla: 7, sqft: 1575, dims: '30 x 52.5' },
+                    { label: '10 Marla (35×65)', marla: 10, sqft: 2250, dims: '35 x 65' },
+                    { label: '1 Kanal (50×90)', marla: 20, sqft: 4500, dims: '50 x 90' },
                   ].map(item => (
                     <button
                       key={item.label}
                       type="button"
-                      onClick={() => {
-                        setAreaMarla(item.marla);
-                        setAreaSqft(item.sqft);
-                      }}
+                      onClick={() => handleSelectPlotPreset(item.marla, item.sqft, item.dims)}
                       className="px-3 py-1.5 bg-stone-100 hover:bg-emerald-50 hover:text-emerald-900 border border-stone-200 hover:border-emerald-300 rounded-lg text-xs font-semibold cursor-pointer transition-colors"
                     >
                       {item.label}
@@ -2229,13 +2403,14 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                 </div>
               </div>
 
+              {/* Basic Sizing Row */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                   <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Area (Marla) *</label>
                   <input
                     type="number"
                     step="0.5"
-                    min="1"
+                    min="0.5"
                     value={areaMarla}
                     onChange={e => {
                       const m = Number(e.target.value);
@@ -2250,7 +2425,7 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                   <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Area (Sq Ft) *</label>
                   <input
                     type="number"
-                    min="100"
+                    min="50"
                     value={areaSqft}
                     onChange={e => {
                       const s = Number(e.target.value);
@@ -2261,33 +2436,64 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                   />
                 </div>
 
-                <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Bedrooms</label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={bedrooms}
-                    onChange={e => setBedrooms(Number(e.target.value))}
-                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
-                  />
-                  <span className="text-[10px] text-stone-400">0 for commercial</span>
-                </div>
+                {propertyType === 'estate' ? (
+                  <>
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Plot Dimensions</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 25 x 45"
+                        value={plotDimensions}
+                        onChange={e => setPlotDimensions(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      />
+                      <span className="text-[10px] text-stone-400">Length x Width (Ft)</span>
+                    </div>
 
-                <div>
-                  <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Bathrooms</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={bathrooms}
-                    onChange={e => setBathrooms(Number(e.target.value))}
-                    className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
-                  />
-                </div>
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Plot # & Sector</label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Plot 45, Sector B"
+                        value={plotNumber}
+                        onChange={e => setPlotNumber(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      />
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Bedrooms</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={bedrooms}
+                        onChange={e => setBedrooms(Number(e.target.value))}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      />
+                      <span className="text-[10px] text-stone-400">0 for commercial</span>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Bathrooms</label>
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={bathrooms}
+                        onChange={e => setBathrooms(Number(e.target.value))}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               <div>
-                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">Year Built / Completed</label>
+                <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                  {propertyType === 'estate' ? 'Development / Possession Year' : 'Year Built / Completed'}
+                </label>
                 <input
                   type="number"
                   min="1990"
@@ -2298,121 +2504,349 @@ const AdvancedPropertyModal: React.FC<AdvancedPropertyModalProps> = ({ property,
                 />
               </div>
 
-              {/* Sadiqabad House Construction & Legal Specs (گھر کی تفصیلی معلومات) */}
-              <div className="pt-4 border-t border-stone-200 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-stone-800">
-                    House Specifications & Utilities (گھر کی تفصیلی معلومات)
-                  </h4>
-                  <span className="text-[10px] text-stone-400">Displayed in House Details panel</span>
+              {/* DYNAMIC SPECS PANEL ACCORDING TO PROPERTY TYPE */}
+
+              {/* 1. PLOT SPECIFICATIONS (پلاٹ کی تفصیلی معلومات) */}
+              {propertyType === 'estate' && (
+                <div className="pt-4 border-t border-stone-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-emerald-900 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-emerald-700" />
+                      <span>Plot Specifications & Legal Details (پلاٹ کی مکمل معلومات)</span>
+                    </h4>
+                    <span className="text-[10px] text-stone-400">Displayed in Plot Details on live website</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Plot Dimensions (پلاٹ کی پیمائش)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 25 x 45 (Front 25ft, Length 45ft)"
+                        value={plotDimensions}
+                        onChange={e => setPlotDimensions(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Possession Status (قبضہ کی صورتحال)
+                      </label>
+                      <select
+                        value={possessionStatus}
+                        onChange={e => setPossessionStatus(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      >
+                        <option value="Immediate Possession (فوری قبضہ - Ready for Construction)">
+                          Immediate Possession (فوری قبضہ - Ready for Construction)
+                        </option>
+                        <option value="Possession on Full Payment">Possession on Full Payment</option>
+                        <option value="Ready for Immediate House Construction">Ready for Immediate House Construction</option>
+                        <option value="Under-Development / Upcoming Possession">Under-Development / Upcoming Possession</option>
+                        <option value="File with Plot Balloting Complete">File with Plot Balloting Complete</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Corner Plot (کارنر پلاٹ)
+                      </label>
+                      <select
+                        value={isCorner}
+                        onChange={e => setIsCorner(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      >
+                        <option value="No (Standard Plot)">No (Standard General Plot)</option>
+                        <option value="Yes (Corner Plot - Two Sided Open)">Yes (Corner Plot - Two Sided Open)</option>
+                        <option value="Yes (Main Boulevard Corner Plot)">Yes (Main Boulevard Corner Plot)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Park Facing (پارک فیسنگ)
+                      </label>
+                      <select
+                        value={isParkFacing}
+                        onChange={e => setIsParkFacing(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      >
+                        <option value="No">No</option>
+                        <option value="Yes (Direct Front Facing Park)">Yes (Direct Front Facing Park)</option>
+                        <option value="Very Close to Central Park (Walking 1 min)">Very Close to Central Park (Walking 1 min)</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Boundary Wall & Gate (چار دیواری)
+                      </label>
+                      <select
+                        value={boundaryWall}
+                        onChange={e => setBoundaryWall(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      >
+                        <option value="Complete Boundary Wall with Iron Gate">Complete Boundary Wall with Iron Gate</option>
+                        <option value="Boundary Demarcated with Corner Pillars">Boundary Demarcated with Corner Pillars</option>
+                        <option value="Open Clear Land Ready for Demarcation">Open Clear Land Ready for Demarcation</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Road & Street Width (روڈ اور گلی کی چوڑائی)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 40ft Main Boulevard / 30ft Carpeted Street"
+                        value={streetWidth}
+                        onChange={e => setStreetWidth(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Registry & Intiqal Status (رجسٹری و انتقال)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 100% Registry & Intiqal Clear (رجسٹری انتقال پاس)"
+                        value={registryStatus}
+                        onChange={e => setRegistryStatus(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Utilities in Street (گلی میں میٹھا پانی، گیس، بجلی)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Sweet Water Pipe, Sui Gas Line & WAPDA Pole Ready"
+                        value={waterSource}
+                        onChange={e => setWaterSource(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+                  </div>
                 </div>
+              )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
-                      Structure & Roof (لنٹر و تعمیر)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Single Story (RCC Lenter & Awwal Eent)"
-                      value={structureType}
-                      onChange={e => setStructureType(e.target.value)}
-                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                    />
+              {/* 2. COMMERCIAL SPECIFICATIONS (کمرشل تفاصیل) */}
+              {propertyType === 'commercial' && (
+                <div className="pt-4 border-t border-stone-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-stone-800 flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-stone-700" />
+                      <span>Commercial Plaza & Shop Details (کمرشل تفاصیل)</span>
+                    </h4>
+                    <span className="text-[10px] text-stone-400">Displayed in Commercial Unit Details</span>
                   </div>
 
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
-                      Registry & Legal Title (رجسٹری و انتقال)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 100% Registry & Intiqal Clear (رجسٹری انتقال پاس)"
-                      value={registryStatus}
-                      onChange={e => setRegistryStatus(e.target.value)}
-                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                    />
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Commercial Frontage Width (فرنٹ چوڑائی)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 35 Feet Road Frontage with 4 Shutters"
+                        value={commercialFrontage}
+                        onChange={e => setCommercialFrontage(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900 font-semibold"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
-                      Car Porch Size (کار پورچ)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Car Porch for Sedan (Corolla/City) & Bikes"
-                      value={carPorch}
-                      onChange={e => setCarPorch(e.target.value)}
-                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Monthly Rental Income (ماہانہ کرایہ)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Rs. 1,80,000 / month (Current Tenants)"
+                        value={rentalIncome}
+                        onChange={e => setRentalIncome(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
-                      Water Boring & Motor (میٹھا پانی بور)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Sweet Water Bore with 1HP Electric Motor"
-                      value={waterSource}
-                      onChange={e => setWaterSource(e.target.value)}
-                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Structure & Floors (منزلیں اور شٹرز)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Ground + 2 Commercial Floors, Basement Parking"
+                        value={structureType}
+                        onChange={e => setStructureType(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
-                      Sui Gas Status (سوئی گیس)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Sui Gas Meter Installed / Gas Available"
-                      value={gasStatus}
-                      onChange={e => setGasStatus(e.target.value)}
-                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Road & Boulevard Frontage (روڈ کا سائز)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 80ft Main KLP Commercial Boulevard"
+                        value={streetWidth}
+                        onChange={e => setStreetWidth(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
-                      Electricity Meter (واپڈا میٹر)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Independent WAPDA Electric Meter Installed"
-                      value={electricity}
-                      onChange={e => setElectricity(e.target.value)}
-                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                    />
-                  </div>
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Registry & Commercial Approval
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. TMA Commercial Approval & 100% Registry Clear"
+                        value={registryStatus}
+                        onChange={e => setRegistryStatus(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
 
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
-                      Flooring & Marble (فرش)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. Full Badal Marble & Ceramic Tiles"
-                      value={flooring}
-                      onChange={e => setFlooring(e.target.value)}
-                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
-                      Street Width (گلی کا سائز)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. 30ft Wide Carpeted Street"
-                      value={streetWidth}
-                      onChange={e => setStreetWidth(e.target.value)}
-                      className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
-                    />
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Commercial Electricity
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 3-Phase Heavy Commercial Meter Installed"
+                        value={electricity}
+                        onChange={e => setElectricity(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+
+              {/* 3. RESIDENTIAL HOUSE SPECIFICATIONS (گھر کی تفصیلی معلومات) */}
+              {propertyType !== 'estate' && propertyType !== 'commercial' && (
+                <div className="pt-4 border-t border-stone-200 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-xs uppercase tracking-wider text-stone-800">
+                      House Specifications & Utilities (گھر کی تفصیلی معلومات)
+                    </h4>
+                    <span className="text-[10px] text-stone-400">Displayed in House Details panel</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Structure & Roof (لنٹر و تعمیر)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Single Story (RCC Lenter & Awwal Eent)"
+                        value={structureType}
+                        onChange={e => setStructureType(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Registry & Legal Title (رجسٹری و انتقال)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 100% Registry & Intiqal Clear (رجسٹری انتقال پاس)"
+                        value={registryStatus}
+                        onChange={e => setRegistryStatus(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Car Porch Size (کار پورچ)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Car Porch for Sedan (Corolla/City) & Bikes"
+                        value={carPorch}
+                        onChange={e => setCarPorch(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Water Boring & Motor (میٹھا پانی بور)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Sweet Water Bore with 1HP Electric Motor"
+                        value={waterSource}
+                        onChange={e => setWaterSource(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Sui Gas Status (سوئی گیس)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Sui Gas Meter Installed / Gas Available"
+                        value={gasStatus}
+                        onChange={e => setGasStatus(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Electricity Meter (واپڈا میٹر)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Independent WAPDA Electric Meter Installed"
+                        value={electricity}
+                        onChange={e => setElectricity(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Flooring & Marble (فرش)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Full Badal Marble & Ceramic Tiles"
+                        value={flooring}
+                        onChange={e => setFlooring(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-bold uppercase tracking-wider text-stone-600 mb-1">
+                        Street Width (گلی کا سائز)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. 30ft Wide Carpeted Street"
+                        value={streetWidth}
+                        onChange={e => setStreetWidth(e.target.value)}
+                        className="w-full h-10 px-3 bg-stone-50 border border-stone-200 rounded-lg text-stone-900"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
