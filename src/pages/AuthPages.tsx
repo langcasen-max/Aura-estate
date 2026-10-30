@@ -1,19 +1,20 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Logo } from '../components/common/Logo';
-import { isDesignatedAdminEmail } from '../lib/security';
-import { Eye, EyeOff, Lock, Mail, User, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { isDesignatedAdminEmail, PRIMARY_ADMIN_EMAIL } from '../lib/security';
+import { Eye, EyeOff, Lock, Mail, User, ArrowLeft, CheckCircle2, Loader2, ShieldCheck, Sparkles } from 'lucide-react';
 
 interface AuthPageProps {
   onNavigate: (path: string) => void;
 }
 
 export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
-  const { signIn, isLoading } = useAuth();
+  const { signIn, loginAsAdminWithEmail, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [adminLoading, setAdminLoading] = useState(false);
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e && typeof e.preventDefault === 'function') {
@@ -36,6 +37,20 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
     } catch (err: any) {
       console.warn('[Login Error]:', err?.message || err);
       setError(err?.message || 'Invalid credentials. Please verify your email and password.');
+    }
+  };
+
+  const handleAdminDirectAccess = async () => {
+    setError(null);
+    setAdminLoading(true);
+    try {
+      setEmail(PRIMARY_ADMIN_EMAIL);
+      await loginAsAdminWithEmail(PRIMARY_ADMIN_EMAIL);
+      onNavigate('/admin');
+    } catch (err: any) {
+      setError(err?.message || 'Access restricted to authorized Admin Gmail.');
+    } finally {
+      setAdminLoading(false);
     }
   };
 
@@ -63,9 +78,23 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">
-              Email Address
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-stone-600">
+                Email Address
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail(PRIMARY_ADMIN_EMAIL);
+                  setError(null);
+                }}
+                className="text-[10px] text-amber-800 hover:text-amber-950 font-bold flex items-center gap-1 cursor-pointer bg-amber-500/15 hover:bg-amber-500/25 px-2 py-0.5 rounded-full border border-amber-300/70 transition-colors"
+                title="Autofill designated administrator Gmail"
+              >
+                <Sparkles className="w-3 h-3 text-amber-700" />
+                <span>Autofill Admin (آٹو فل جی میل)</span>
+              </button>
+            </div>
             <div className="relative">
               <input
                 type="email"
@@ -73,7 +102,7 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
                 placeholder="name@domain.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full h-11 pl-10 pr-3.5 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:outline-none focus:border-stone-800"
+                className="w-full h-11 pl-10 pr-3.5 bg-stone-50 border border-stone-200 rounded-lg text-xs text-stone-900 focus:outline-none focus:border-stone-800 font-mono"
               />
               <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
             </div>
@@ -120,11 +149,32 @@ export const LoginPage: React.FC<AuthPageProps> = ({ onNavigate }) => {
           <button
             type="button"
             onClick={() => void handleSubmit()}
-            disabled={isLoading}
+            disabled={isLoading || adminLoading}
             className="w-full bg-stone-900 hover:bg-stone-800 disabled:opacity-50 text-white font-bold text-xs py-3.5 rounded-full shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Sign In to Account</span>}
           </button>
+
+          {/* Admin Instant 1-Click Autofill Gmail & Open Admin Button */}
+          <div className="pt-2">
+            <button
+              type="button"
+              onClick={() => void handleAdminDirectAccess()}
+              disabled={isLoading || adminLoading}
+              className="w-full bg-gradient-to-r from-amber-500/20 via-amber-400/25 to-amber-500/20 hover:from-amber-500/30 hover:to-amber-500/30 text-amber-950 border border-amber-300/80 hover:border-amber-400 font-bold text-xs py-3 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              title="Click to autofill Gmail and open admin panel instantly with no password required"
+            >
+              {adminLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin text-amber-800" />
+              ) : (
+                <Sparkles className="w-4 h-4 text-amber-700" />
+              )}
+              <span>Autofill Gmail & Open Admin (آٹو فل کر کے ایڈمن کھولیں)</span>
+            </button>
+            <p className="text-[10px] text-stone-400 text-center mt-1.5">
+              No password needed. One click automatically logs into the Admin Console.
+            </p>
+          </div>
         </div>
 
         <div className="text-center text-xs text-stone-500 pt-2 border-t border-stone-100">

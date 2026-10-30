@@ -20,6 +20,7 @@ interface AuthContextType {
   isLoading: boolean;
   isDemoMode: boolean;
   signIn: (email: string, pass: string) => Promise<UserProfile>;
+  loginAsAdminWithEmail: (email: string) => Promise<UserProfile>;
   signUp: (name: string, email: string, pass: string) => Promise<{ needsEmailConfirmation?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
@@ -255,6 +256,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  /**
+   * Fast Administrator Direct Access:
+   * Re-enter the designated administrator Gmail to automatically authenticate as admin.
+   */
+  const loginAsAdminWithEmail = async (email: string): Promise<UserProfile> => {
+    setIsLoading(true);
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      if (!cleanEmail) {
+        throw new Error('Please enter your administrator Gmail address.');
+      }
+      if (!isDesignatedAdminEmail(cleanEmail)) {
+        throw new Error('Access denied. Only the authorized administrator Gmail can unlock the Admin Panel.');
+      }
+
+      const activeUser: UserProfile = {
+        id: 'usr-admin-langcasen',
+        email: PRIMARY_ADMIN_EMAIL,
+        full_name: 'Administrator',
+        role: 'admin',
+        created_at: new Date().toISOString(),
+      };
+
+      setUser(activeUser);
+      localStorage.setItem(DEMO_USER_KEY, JSON.stringify(activeUser));
+      return activeUser;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const signUp = async (name: string, email: string, pass: string) => {
     setIsLoading(true);
     try {
@@ -382,6 +414,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isLoading,
         isDemoMode,
         signIn,
+        loginAsAdminWithEmail,
         signUp,
         signOut,
         updateProfile,

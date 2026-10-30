@@ -36,7 +36,7 @@ import {
 } from '../services/userService';
 import { getAnalyticsSummary, AnalyticsSummary } from '../services/analyticsService';
 import { getSiteSettings, updateSiteSettings, resetDefaultSettings } from '../services/settingsService';
-import { generateSafeSlug } from '../lib/security';
+import { generateSafeSlug, PRIMARY_ADMIN_EMAIL } from '../lib/security';
 import { processImageFile, isValidImageSource } from '../lib/imageUpload';
 import {
   LayoutDashboard,
@@ -103,7 +103,7 @@ const PRESET_IMAGE_GALLERY = [
 ];
 
 export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, loginAsAdminWithEmail } = useAuth();
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
 
   // Core Data
@@ -114,6 +114,14 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
   const [siteSettings, setSiteSettings] = useState<SiteSettings>(getSiteSettings);
 
   const [loading, setLoading] = useState(true);
+
+  // Admin Direct Login & Re-enter Gmail State
+  const [adminEmailInput, setAdminEmailInput] = useState('');
+  const [adminAuthError, setAdminAuthError] = useState<string | null>(null);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [reenterModalOpen, setReenterModalOpen] = useState(false);
+  const [reenterEmailInput, setReenterEmailInput] = useState('');
+  const [reenterError, setReenterError] = useState<string | null>(null);
 
   // Property Filters in Admin
   const [propertySearch, setPropertySearch] = useState('');
@@ -170,21 +178,161 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
     reloadData();
   }, []);
 
+  const handleAdminEmailSubmit = async (e?: React.FormEvent) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
+    const trimmed = adminEmailInput.trim();
+    if (!trimmed) {
+      setAdminAuthError('براہ کرم ایڈمن جی میل (Gmail) درج کریں۔');
+      return;
+    }
+    setAdminAuthError(null);
+    setIsAuthenticating(true);
+    try {
+      await loginAsAdminWithEmail(trimmed);
+      showNotification('success', 'ایڈمن لاگ ان کامیاب! ایڈمن پینل ان لاک ہو گیا۔');
+      reloadData();
+    } catch (err: any) {
+      setAdminAuthError(err.message || 'Access Denied: Only the authorized administrator Gmail can unlock the Admin Panel.');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const handleAutofillAndLogin = async (overrideEmail?: string) => {
+    const targetEmail = (overrideEmail || PRIMARY_ADMIN_EMAIL).trim();
+    setAdminEmailInput(targetEmail);
+    setAdminAuthError(null);
+    setIsAuthenticating(true);
+    try {
+      await loginAsAdminWithEmail(targetEmail);
+      showNotification('success', 'ایڈمن جی میل آٹو فل ہو گئی اور ایڈمن پینل کھل گیا!');
+      reloadData();
+    } catch (err: any) {
+      setAdminAuthError(err.message || 'Access Denied: Only the authorized administrator Gmail can unlock the Admin Panel.');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
   if (!isAdmin) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-24 text-center space-y-4">
-        <ShieldCheck className="w-12 h-12 text-stone-400 mx-auto" />
-        <h2 className="font-serif text-3xl text-stone-900">Access Restricted</h2>
-        <p className="text-xs text-stone-500 leading-relaxed">
-          The administrative operations console is strictly reserved for authenticated Aura Estates agency staff.
-        </p>
-        <button
-          type="button"
-          onClick={() => onNavigate('/')}
-          className="bg-stone-900 text-white text-xs font-bold px-6 py-2.5 rounded-full cursor-pointer hover:bg-stone-800"
-        >
-          Return Home
-        </button>
+      <div className="min-h-[75vh] flex items-center justify-center px-4 py-16 animate-fadeIn">
+        <div className="max-w-md w-full bg-white border border-stone-200/90 rounded-3xl p-8 sm:p-10 shadow-2xl space-y-6 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-700 flex items-center justify-center mx-auto border border-amber-500/20 shadow-xs">
+            <ShieldCheck className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-2">
+            <span className="text-[10px] font-mono tracking-widest uppercase text-amber-800 font-bold block">
+              Aura Estates Operations Console
+            </span>
+            <h2 className="font-serif text-3xl font-normal text-stone-900">
+              Admin Direct Access
+            </h2>
+            <p className="text-xs text-stone-600 leading-relaxed">
+              ایڈمن پینل کے لیے صرف جی میل درکار ہے۔ نیچے دیے گئے بٹن پر کلک کریں تاکہ جی میل خودکار طور پر شامل ہو جائے اور بغیر پاسورڈ ایڈمن پینل کھل جائے۔
+            </p>
+          </div>
+
+          {adminAuthError && (
+            <div className="p-3.5 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2.5 text-left" role="alert">
+              <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+              <span>{adminAuthError}</span>
+            </div>
+          )}
+
+          <div className="space-y-4 text-left">
+            {/* Primary One-Click Instant Autofill & Open Button */}
+            <button
+              type="button"
+              onClick={() => void handleAutofillAndLogin(PRIMARY_ADMIN_EMAIL)}
+              disabled={isAuthenticating}
+              className="w-full h-13 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-stone-950 font-bold text-xs rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2.5 cursor-pointer disabled:opacity-50 transform hover:scale-[1.01]"
+              title="Autofill Gmail and open admin panel instantly with no password required"
+            >
+              {isAuthenticating ? (
+                <Loader2 className="w-4 h-4 animate-spin text-stone-950" />
+              ) : (
+                <>
+                  <Sparkles className="w-4 h-4 text-stone-950" />
+                  <span>Autofill Gmail & Open Admin Panel (آٹو فل اور لاگ ان)</span>
+                </>
+              )}
+            </button>
+
+            <div className="relative flex py-1 items-center">
+              <div className="flex-grow border-t border-stone-200"></div>
+              <span className="flex-shrink mx-3 text-[10px] text-stone-400 font-semibold uppercase tracking-wider">
+                یا جی میل درج کر کے کھولیں
+              </span>
+              <div className="flex-grow border-t border-stone-200"></div>
+            </div>
+
+            <form onSubmit={handleAdminEmailSubmit} className="space-y-3.5">
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600">
+                    Admin Gmail Address
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAdminEmailInput(PRIMARY_ADMIN_EMAIL);
+                      if (adminAuthError) setAdminAuthError(null);
+                    }}
+                    className="text-[11px] text-amber-800 hover:text-amber-950 font-bold flex items-center gap-1 cursor-pointer bg-amber-500/15 hover:bg-amber-500/25 px-2.5 py-0.5 rounded-full border border-amber-300/70 transition-colors"
+                    title="Autofill designated admin email into this field"
+                  >
+                    <Sparkles className="w-3 h-3 text-amber-700" />
+                    <span>Autofill Gmail (آٹو فل)</span>
+                  </button>
+                </div>
+
+                <div className="relative">
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@gmail.com"
+                    value={adminEmailInput}
+                    onChange={e => {
+                      setAdminEmailInput(e.target.value);
+                      if (adminAuthError) setAdminAuthError(null);
+                    }}
+                    className="w-full h-12 pl-10 pr-3.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-stone-800 transition-all font-mono"
+                  />
+                  <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-4" />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isAuthenticating}
+                className="w-full h-11 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isAuthenticating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4 text-amber-400" />
+                    <span>Verify Gmail & Open Admin Panel (ایڈمن پینل کھولیں)</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          <div className="pt-2 border-t border-stone-100 flex items-center justify-center">
+            <button
+              type="button"
+              onClick={() => onNavigate('/')}
+              className="text-xs text-stone-500 hover:text-stone-900 font-semibold cursor-pointer transition-colors"
+            >
+              ← Return to Public Website
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -425,6 +573,20 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
           >
             <Trash2 className="w-3.5 h-3.5 text-red-400" />
             <span>Purge Demo Data</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setReenterEmailInput(user?.email || '');
+              setReenterError(null);
+              setReenterModalOpen(true);
+            }}
+            className="bg-amber-600/20 hover:bg-amber-600/30 text-amber-200 border border-amber-500/40 font-semibold text-xs px-4 py-2.5 rounded-full shadow-md flex items-center gap-1.5 cursor-pointer transition-colors"
+            title="Re-enter or verify administrator Gmail"
+          >
+            <Mail className="w-3.5 h-3.5 text-amber-400" />
+            <span>Re-enter Admin Gmail (ایڈمن جی میل)</span>
           </button>
 
           <button
@@ -1930,6 +2092,133 @@ export const AdminDashboardPage: React.FC<{ onNavigate: (path: string) => void }
                 {resetConfirmAction === 'clear_all_properties' ? 'Purge All Demo Listings' : 'Proceed with Reset'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+      {/* RE-ENTER ADMIN GMAIL MODAL */}
+      {reenterModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-950/75 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-6">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-700 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif text-xl text-stone-900 font-bold">
+                    Re-enter Admin Gmail
+                  </h3>
+                  <p className="text-[11px] text-stone-500">ایڈمن سیشن کی تصدیق یا نیا لاگ ان</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReenterModalOpen(false)}
+                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-full hover:bg-stone-100 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {reenterError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-xl flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{reenterError}</span>
+              </div>
+            )}
+
+            <form
+              onSubmit={async e => {
+                e.preventDefault();
+                const trimmed = reenterEmailInput.trim();
+                if (!trimmed) {
+                  setReenterError('براہ کرم ایڈمن جی میل درج کریں۔');
+                  return;
+                }
+                setReenterError(null);
+                try {
+                  await loginAsAdminWithEmail(trimmed);
+                  setReenterModalOpen(false);
+                  showNotification('success', 'ایڈمن سیشن تصدیق شدہ ہے۔');
+                  reloadData();
+                } catch (err: any) {
+                  setReenterError(err.message || 'Access Denied: Only authorized administrator Gmail can unlock this panel.');
+                }
+              }}
+              className="space-y-4 text-xs text-left"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[11px] font-bold uppercase tracking-wider text-stone-600">
+                    Authorized Admin Gmail
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setReenterEmailInput(PRIMARY_ADMIN_EMAIL);
+                      if (reenterError) setReenterError(null);
+                    }}
+                    className="text-[11px] text-amber-800 hover:text-amber-950 font-bold flex items-center gap-1 cursor-pointer bg-amber-500/15 hover:bg-amber-500/25 px-2 py-0.5 rounded-full border border-amber-300/70 transition-colors"
+                  >
+                    <Sparkles className="w-3 h-3 text-amber-700" />
+                    <span>Autofill Gmail (آٹو فل)</span>
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type="email"
+                    required
+                    placeholder="name@gmail.com"
+                    value={reenterEmailInput}
+                    onChange={e => {
+                      setReenterEmailInput(e.target.value);
+                      if (reenterError) setReenterError(null);
+                    }}
+                    className="w-full h-11 pl-10 pr-3.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-semibold text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-500/30 font-mono"
+                  />
+                  <Mail className="w-4 h-4 text-stone-400 absolute left-3.5 top-3.5" />
+                </div>
+                <span className="text-[10px] text-stone-400 mt-1 block">
+                  جی میل انٹر کرتے ہی آپ کا ایڈمن پینل آٹومیٹک لاگ ان اور ریفریش ہو جائے گا۔
+                </span>
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setReenterModalOpen(false)}
+                  className="w-full sm:w-auto px-4 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs rounded-lg cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setReenterEmailInput(PRIMARY_ADMIN_EMAIL);
+                    setReenterError(null);
+                    try {
+                      await loginAsAdminWithEmail(PRIMARY_ADMIN_EMAIL);
+                      setReenterModalOpen(false);
+                      showNotification('success', 'ایڈمن سیشن آٹو فل اور تصدیق شدہ ہے۔');
+                      reloadData();
+                    } catch (err: any) {
+                      setReenterError(err.message || 'Access Denied: Only authorized administrator Gmail can unlock this panel.');
+                    }
+                  }}
+                  className="w-full sm:w-auto px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-lg shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Autofill & Verify (آٹو فل لاگ ان)</span>
+                </button>
+                <button
+                  type="submit"
+                  className="w-full sm:w-auto px-5 py-2.5 bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs rounded-lg shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  <ShieldCheck className="w-4 h-4 text-amber-400" />
+                  <span>Set Admin Session</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
